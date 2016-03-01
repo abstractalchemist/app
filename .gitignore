@@ -1,2 +1,5 @@
 *~
 *jpg
+\#*
+/dist
+/node_modules
