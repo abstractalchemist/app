@@ -17,7 +17,7 @@ const Front = React.createClass({
     },
     render() {
 	return ( <div id="front">
-		 <IndexBanner title="Abstract Alchemist's Lab" description="Something Interesting" starting="Start Here" img="background1.jpg"/>
+		 <IndexBanner title="Abstract Alchemist's Lab" description="Something Interesting" img="background1.jpg" signin="true"/>
 		 <Sections sections={this.props.locations}/>
 		 <Parallax title="Other Stuff You Might Be Interested In" img="background3.jpg" />
 		 <Footer settings={ this.settings() } connect={ this.connections()} bio="I am a programmer"/>

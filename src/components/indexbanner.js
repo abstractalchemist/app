@@ -1,4 +1,6 @@
 import React from 'react/dist/react'
+import GoogleSign from './google_signin'
+//import SignIn from './signin'
 
 export default React.createClass({
     componentDidMount() {
@@ -10,14 +12,18 @@ export default React.createClass({
     render() {
 	return (<div className="parallax-container">
 		<div className="section no-pad-bot">
-		<div className="container">
+		<div className="container center">
 		<br></br>
 		<h1 className="header center teal-text text-lighten-2">{ this.props.title }</h1>
 		<div className="row center">
 		<h5 className="header col s12 light">{ this.props.description }</h5>
 		</div>
+
 		{( () => {
-		    if(this.props.starting) {
+		    if(this.props.signin) {
+			return ( <GoogleSign /> );
+		    }
+		    else if(this.props.starting) {
 			return ( <div className="row center">
 				 <a href="#" className="btn-large waves-effect waves-light teal lighten-1">{ this.props.starting  }</a>
 				 </div>
