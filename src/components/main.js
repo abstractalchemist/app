@@ -36,27 +36,28 @@ export default React.createClass({
     findLocation(locationId) {
 	return this.locations().find( ({ id, view }) => id === locationId );
     },
-    handleEvent(payload) {
-	if(payload.actionType === "viewChanged") {
-	    console.log("Changing view to " + payload.view);
-
-	    this.setState({ currentView: ( () => {
-		if (payload.view === "front")
-		    return <Front locations={ this.locations() } />
-		    return this.findLocation(payload.view).view;
-	    })() });
-	}
-			  
-    },
     getInitialState() {
 	return { currentView : <Front locations={ this.locations() }/> };
     },
     componentDidMount() {
-	this.dispatcherToken = Dispatcher.register(this.handleEvent);
+	let src = Rx.Observable.fromEventPattern(h => this.dispatchToken = Dispatcher.register(h),
+						 h => { },
+						 payload => {
+						     if(payload.actionType === 'viewChanged') {
+							 console.log("view changed");
+							 if(payload.view === 'front')
+							     return ( <Front locations={this.locations()} /> );
+							 return this.findLocation(payload.view).view;
+						     }
+						 });
+	this.viewSub = src.subscribe(view => this.setState({ currentView: view}));
 
     },
     componentDidUpdate() {
 
+    },
+    componentDidUnmount() {
+	this.viewSub.dispose()
     },
     render() {
 	return (<div>

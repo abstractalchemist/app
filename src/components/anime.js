@@ -38,13 +38,20 @@ const Pagination = React.createClass({
 });
 
 const AnimeItem = React.createClass({
-    onEdit(evt) {
-	evt.preventDefault();
+    componentDidMount() {
+	Rx.Observable.fromEventPattern(h => this.onEdit = h.bind(this));;
+	Rx.Observable.fromEventPattern(h => this.onComment = h.bind(this));
+	Rx.Observable.fromEventPattern(h => this.onRate = h.bind(this));
     },
-    onComment(evt) {
+    componentDidUnmount() {
     },
-    onRate(evt) {
-    },
+    // onEdit(evt) {
+    // 	evt.preventDefault();
+    // },
+    // onComment(evt) {
+    // },
+    // onRate(evt) {
+    // },
     render() {
 	return ( <div className="col m4">
 		 <div className="card">
@@ -86,17 +93,19 @@ export default React.createClass({
 	return { currentLow: 0, currentHigh: 10, current: [] };
     },
     componentWillMount() {
-	let update = () => {
-	    //this.setState({ current :AnimeStore.get(this.state.currentLow, this.state.currentHigh) });
-	    AnimeStore.get(this.state.currentLow, this.state.currentHigh).then((data) => {
-		this.setState({ current : data });
-	    })
-	    window.setTimeout(update, 60000);
-	};
-	window.setTimeout(update, 6000);
-	ImageGallery.images().then((data) => {
-	    this.setState({images : data});
-	})
+
+	this.animeSubscription = Rx.Observable
+	    .timer(500,30000)
+	    .flatMap(_ => AnimeStore.get(this.state.currentLow, this.state.currentHigh))
+	    .subscribe(data => this.setState({current: data}));
+	this.imageGallerySubscription = Rx.Observable
+	    .timer(500,30000)
+	    .flatMap(_ => ImageGallery.images())
+	    .subscribe(data => this.setState({images: data}));
+    },
+    componentWillUnmount() {
+	this.animeSubscription.dispose();
+	this.imageGallerySubscription.dispose();
     },
     render() {
 	return ( <div>
