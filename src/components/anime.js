@@ -3,6 +3,7 @@ import IndexBanner from './indexbanner'
 import Carousel from './carousel'
 import AnimeStore from '../stores/anime'
 import ImageGallery from '../stores/image_gallery'
+import Dispatcher from '../util/dispatcher'
 
 const Pagination = React.createClass({
     getInitialState() {
@@ -39,11 +40,13 @@ const Pagination = React.createClass({
 
 const AnimeItem = React.createClass({
     componentDidMount() {
-	Rx.Observable.fromEventPattern(h => this.onEdit = h.bind(this));;
+	Rx.Observable.fromEventPattern(h => this.onEdit = h.bind(this))
+	    .map( _ => { return { actionType: "animeEdit", id: this.props.title } })
+	    .subscribe(Dispatcher.dispatch);
 	Rx.Observable.fromEventPattern(h => this.onComment = h.bind(this));
 	Rx.Observable.fromEventPattern(h => this.onRate = h.bind(this));
     },
-    componentDidUnmount() {
+    componentWillUnmount() {
     },
     // onEdit(evt) {
     // 	evt.preventDefault();
@@ -88,7 +91,7 @@ const AnimeItem = React.createClass({
     }
 });
 
-export default React.createClass({
+const AnimeView = React.createClass({
     getInitialState() {
 	return { currentLow: 0, currentHigh: 10, current: [] };
     },
@@ -128,5 +131,42 @@ export default React.createClass({
 		 </div>
 		 
 	       );
+    }
+});
+
+const AnimeEdit = React.createClass({
+    render() {
+	return ( <div className="container">
+		 <h1>{ this.props.title }</h1>
+		 <div className="row">
+		 <form className="col s12">
+		 <div className="row">
+		 <div className="input-field col s12">
+		 <textarea id="textarea1" className="materialize-textarea"></textarea>
+		 <label for="textarea1">Textarea</label>
+		 </div>
+		 </div>
+		 </form>
+		 </div>
+		 </div>
+	);
+    }
+});
+
+export default React.createClass({
+    getInitialState() {
+	return { view: ( <AnimeView /> )};
+    },
+    componentDidMount() {
+	Rx.Observable.fromEventPattern(h => Dispatcher.register(h))
+	    .filter(payload => payload.actionType === 'animeEdit')
+	    .subscribe(payload => this.setState({ view : ( <AnimeEdit title={this.payload.title} /> ) }));
+		       
+    },
+    render() {
+	return (<div id="anime">
+		{ this.state.view }
+		</div>
+	       )
     }
 });
