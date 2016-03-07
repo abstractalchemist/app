@@ -17,7 +17,8 @@
     "react": "~0.14.7",
     "dispatcher": "0.0.2",
     "dispatchr": "~0.3.3",
-    "flux": "~2.1.1"
+    "flux": "~2.1.1",
+    "ampersand-events": "~1.1.1"
   },
   "devDependencies": {
     "gulp": "~3.9.1",

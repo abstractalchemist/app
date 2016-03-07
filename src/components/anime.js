@@ -97,18 +97,12 @@ const AnimeView = React.createClass({
     },
     componentWillMount() {
 
-	this.animeSubscription = Rx.Observable
-	    .timer(500,30000)
-	    .flatMap(_ => AnimeStore.get(this.state.currentLow, this.state.currentHigh))
-	    .subscribe(data => this.setState({current: data}));
-	this.imageGallerySubscription = Rx.Observable
-	    .timer(500,30000)
-	    .flatMap(_ => ImageGallery.images())
-	    .subscribe(data => this.setState({images: data}));
+	this.subToken = AnimeStore.registerCallback(_ => {
+	    this.setState({ current : AnimeStore.posts() })
+	});
     },
     componentWillUnmount() {
-	this.animeSubscription.dispose();
-	this.imageGallerySubscription.dispose();
+	this.subToken.dispose();
     },
     render() {
 	return ( <div>
@@ -157,11 +151,24 @@ export default React.createClass({
     getInitialState() {
 	return { view: ( <AnimeView /> )};
     },
+    findLocations(loc) {
+	switch(loc) {
+	case 'edit':
+	    return ( <AnimeEdit /> )
+	default:
+	    return ( <AnimeView /> )
+	}
+    },
     componentDidMount() {
-	Rx.Observable.fromEventPattern(h => Dispatcher.register(h))
-	    .filter(payload => payload.actionType === 'animeEdit')
-	    .subscribe(payload => this.setState({ view : ( <AnimeEdit title={this.payload.title} /> ) }));
-		       
+	this.subToken = AnimeStore.registerCallback(_ => {
+	    if(AnimeStore.view()) {
+		console.log("Changing view to " + AnimeStore.view());
+		this.setState({ view: this.findLocations(AnimeStore.view()) })
+	    }
+	});
+    },
+    componentWillUnmount() {
+	this.subToken.dispose();
     },
     render() {
 	return (<div id="anime">
