@@ -17,12 +17,13 @@ export default (function() {
 	    return { url: base + url,
 		     method: "POST",
 		     contentType: "application/json",
+		     processData: false,
 		     beforeSend: xhr => {
 			 let jwt;
 			 if(jwt = window.sessionStorage.getItem('jwt'))
 			     xhr.setRequestHeader('Authorization', 'Bearer ' + jwt);
 		     },
-		     data: data
+		     data: JSON.stringify(data)
 		   }
 	}
     }

@@ -40,7 +40,7 @@ const AnimeItem = React.createClass({
 
     },
     onEdit(evt) {
-	Dispatcher.dispatch({actionType:"animeEdit", view:"edit",id: this.props.titleId});
+	Dispatcher.dispatch({actionType:"animeEdit", view:"edit",id: this.props.titleId, rev:this.props.rev});
 	console.log("on edit clicked");
 	evt.preventDefault();
     },
@@ -102,8 +102,8 @@ const AnimeView = React.createClass({
 		 <div className="row">
 		 {( () => {
 		     if(this.state.current) {
-			 return this.state.current.map( ({id, title,entry,img,editable}) => {
-			     return ( <AnimeItem key={id} titleId={id} title={ title } entry={ entry } img={ img } editable={ editable } /> )
+			 return this.state.current.map( ({id, title,entry,img,editable, _rev: rev}) => {
+			     return ( <AnimeItem key={id} titleId={id} title={ title } entry={ entry } img={ img } editable={ editable } rev={ rev }/> )
 			 })
 		     }
 		 })()
@@ -128,8 +128,13 @@ const AnimeEdit = React.createClass({
 	evt.preventDefault();
     },
     post(evt) {
-	AnimeStore.updatePost(this.props.id, this.state.postBody);
+
+	AnimeStore.updatePost(this.props.id, this.props.rev, this.state.postBody);
+	Dispatcher.dispatch({actionType:"animeEdit"})
 	evt.preventDefault();
+    },
+    textChange(evt) {
+	this.setState({postBody: evt.target.value});
     },
     render() {
 	return ( <div className="container">
@@ -138,7 +143,7 @@ const AnimeEdit = React.createClass({
 		 <form className="col s12">
 		 <div className="row">
 		 <div className="input-field col s12">
-		 <textarea id="textarea1" className="materialize-textarea" value={this.state.postBody}></textarea>
+		 <textarea id="textarea1" className="materialize-textarea" value={this.state.postBody} onChange={this.textChange}></textarea>
 		 <label for="textarea1">Textarea</label>
 		 </div>
 		 <input type="submit" onClick={this.post} className="btn waves-effect waves-light"></input>
@@ -155,11 +160,11 @@ export default React.createClass({
     getInitialState() {
 	return { view: ( <AnimeView /> )};
     },
-    findLocations({view, id, title}) {
+    findLocations({view, id, title, rev}) {
 	
 	switch(view) {
 	case 'edit':
-	    return ( <AnimeEdit id={id} title={title}/> )
+	    return ( <AnimeEdit id={id} title={title} rev={rev}/> )
 	default:
 	    return ( <AnimeView /> )
 	}

@@ -7,7 +7,7 @@ export default (function() {
     
     let viewChange = Rx.Observable.fromEventPattern( h => Dispatcher.register(h) )
 	.filter(payload => { return payload.actionType === 'animeEdit' })
-	.do(({view, id}) => _view = {view,id});
+	.do(({view, id, rev}) => _view = {view,id,rev});
 
     let animeSubscription = Rx.Observable.timer(500, 30000)
 	.flatMap(_ => $.ajax(Utils.get("/anime"))).retry().do(data => _posts = data);
@@ -17,6 +17,10 @@ export default (function() {
     changes.connect();
     
     let store = {
+	updatePost(id, rev, entry) {
+	    console.log("updating posts " + id)
+	    Rx.Observable.fromPromise($.ajax(Utils.post("/anime/" + id, {entry:entry, _rev: rev})));
+	},
 	post(id) {
 	    return Rx.Observable.fromPromise($.ajax(Utils.get("/anime/" + id)));
 	},
