@@ -17,18 +17,15 @@ const Pagination = React.createClass({
 	}
 	if(i === active)
 	    className = "active";
-	return ( <li className={className}><a href="#!">{i}</a></li> );
+	return ( <li key={"page-" + i} className={className}><a href="#!">{i}</a></li> );
 	
     },
     render() {
 	return ( <ul className="pagination center">
 		 <li className="disabled"><a href="#!"><i className="material-icons">chevron_left</i></a></li>
 		 {( () => {
-		     let v = [];
-		     let i = 1;
-		     for(; i <= this.props.pageCount; ++i) {
-			 v[i] = this.page(i);
-		     }
+		     let v = []
+		     Rx.Observable.range(1, this.props.pageCount).map(this.page).subscribe(data => v.push(data))
 		     return v;
 		 })()
 		 }
@@ -40,21 +37,15 @@ const Pagination = React.createClass({
 
 const AnimeItem = React.createClass({
     componentDidMount() {
-	Rx.Observable.fromEventPattern(h => this.onEdit = h.bind(this))
-	    .map( _ => { return { actionType: "animeEdit", id: this.props.title } })
-	    .subscribe(Dispatcher.dispatch);
-	Rx.Observable.fromEventPattern(h => this.onComment = h.bind(this));
-	Rx.Observable.fromEventPattern(h => this.onRate = h.bind(this));
+
+    },
+    onEdit(evt) {
+	Dispatcher.dispatch({actionType:"animeEdit", view:"edit",id: this.props.titleId});
+	console.log("on edit clicked");
+	evt.preventDefault();
     },
     componentWillUnmount() {
     },
-    // onEdit(evt) {
-    // 	evt.preventDefault();
-    // },
-    // onComment(evt) {
-    // },
-    // onRate(evt) {
-    // },
     render() {
 	return ( <div className="col m4">
 		 <div className="card">
@@ -71,12 +62,12 @@ const AnimeItem = React.createClass({
 		 <ul>
 		 {(() => {
 		     if(this.props.editable) {
-			 return ( <li><a className="btn-floating red" onClick={this.onEdit}><i className="material-icons">mode_edit</i></a></li> );
+			 return ( <li key="edit"><a href="#" className="btn-floating red" onClick={this.onEdit}><i className="material-icons">mode_edit</i></a></li> );
 		     }
 		 })()
 		 }
-		 <li><a className="btn-floating yellow darken-1" onClick={this.onComment}><i className="material-icons">comment</i></a></li>
-		 <li><a className="btn-floating green" onClick={this.onRate}><i className="material-icons">star_rate</i></a></li>
+		 <li key="comment"><a href="#" className="btn-floating yellow darken-1" onClick={this.onComment}><i className="material-icons">comment</i></a></li>
+		 <li key="rate"><a href="#" className="btn-floating green" onClick={this.onRate}><i className="material-icons">star_rate</i></a></li>
 		 </ul>
  		 </div>
 		 </div>
@@ -111,8 +102,8 @@ const AnimeView = React.createClass({
 		 <div className="row">
 		 {( () => {
 		     if(this.state.current) {
-			 return this.state.current.map( ({title,entry,img,editable}) => {
-			     return ( <AnimeItem title={ title } entry={ entry } img={ img } editable={ editable } /> )
+			 return this.state.current.map( ({id, title,entry,img,editable}) => {
+			     return ( <AnimeItem key={id} titleId={id} title={ title } entry={ entry } img={ img } editable={ editable } /> )
 			 })
 		     }
 		 })()
@@ -129,6 +120,17 @@ const AnimeView = React.createClass({
 });
 
 const AnimeEdit = React.createClass({
+    getInitialState() {
+	return {};
+    },
+    back(evt) {
+	Dispatcher.dispatch({actionType:"animeEdit"})
+	evt.preventDefault();
+    },
+    post(evt) {
+	AnimeStore.updatePost(this.props.id, this.state.postBody);
+	evt.preventDefault();
+    },
     render() {
 	return ( <div className="container">
 		 <h1>{ this.props.title }</h1>
@@ -136,11 +138,13 @@ const AnimeEdit = React.createClass({
 		 <form className="col s12">
 		 <div className="row">
 		 <div className="input-field col s12">
-		 <textarea id="textarea1" className="materialize-textarea"></textarea>
+		 <textarea id="textarea1" className="materialize-textarea" value={this.state.postBody}></textarea>
 		 <label for="textarea1">Textarea</label>
 		 </div>
+		 <input type="submit" onClick={this.post} className="btn waves-effect waves-light"></input>
 		 </div>
 		 </form>
+		 <a href="#" onClick={this.back} className="btn waves-effect waves-light">Back To View</a>
 		 </div>
 		 </div>
 	);
@@ -151,19 +155,29 @@ export default React.createClass({
     getInitialState() {
 	return { view: ( <AnimeView /> )};
     },
-    findLocations(loc) {
-	switch(loc) {
+    findLocations({view, id, title}) {
+	
+	switch(view) {
 	case 'edit':
-	    return ( <AnimeEdit /> )
+	    return ( <AnimeEdit id={id} title={title}/> )
 	default:
 	    return ( <AnimeView /> )
 	}
     },
     componentDidMount() {
 	this.subToken = AnimeStore.registerCallback(_ => {
-	    if(AnimeStore.view()) {
-		console.log("Changing view to " + AnimeStore.view());
-		this.setState({ view: this.findLocations(AnimeStore.view()) })
+	    let view;
+	    if(view = AnimeStore.view()) {
+		console.log("Changing view to " + view);
+		if(view.id != undefined) {
+		    AnimeStore.post(view.id).subscribe(data => {
+			console.log("using title " + data.title);
+			view.title = data.title;
+			this.setState({ view: this.findLocations(view)});
+		    });
+		}
+		else
+		    this.setState({ view: this.findLocations(view)});
 	    }
 	});
     },
