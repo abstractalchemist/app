@@ -9,7 +9,7 @@ export default (function() {
 		     beforeSend : xhr => {
 			 let jwt;
 			 if(jwt = window.sessionStorage.getItem('jwt'))
-			     xhr.setRequestHeader("Authorization", "Bearer " + jwt);
+			     xhr.setRequestHeader("Authorization", "GoogleSignIn " + jwt);
 		     }
 		   };
 	},
@@ -21,7 +21,7 @@ export default (function() {
 		     beforeSend: xhr => {
 			 let jwt;
 			 if(jwt = window.sessionStorage.getItem('jwt'))
-			     xhr.setRequestHeader('Authorization', 'Bearer ' + jwt);
+			     xhr.setRequestHeader('Authorization', 'GoogleSignIn ' + jwt);
 		     },
 		     data: JSON.stringify(data)
 		   }
