@@ -61,11 +61,11 @@ const AnimeItem = React.createClass({
     },
     editPost(data) {
 	AnimeActions.updateAnimePost({ titleId: this.props.titleId,
-				       title: this.data.title,
+				       title: data.title,
 				       img: this.props.img,
-				       entry: this.data.excerpt,
+				       entry: data.excerpt,
 				       rev: this.props.rev,
-				       content: this.data.content });
+				       content: data.content });
     },
     render() {
 	return ( <div className="col s12">
@@ -131,11 +131,11 @@ const NewAnimePost = React.createClass({
     submitNew(data) {
 	console.log("Submit new log");
 	AnimeActions.newAnimePost({ titleId : undefined,
-				    title: this.data.title,
+				    title: data.title,
 				    img: undefined,
-				    entry: this.data.excerpt,
+				    entry: data.excerpt,
 				    rev: undefined,
-				    content: this.data.content })
+				    content: data.content })
     },
    
     render() {

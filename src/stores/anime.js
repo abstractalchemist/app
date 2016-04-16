@@ -8,18 +8,21 @@ export default (function() {
 	.flatMap(_ => $.ajax(Utils.get("/anime"))).retry().do(data => _posts = data);
 
     let changes = animeSubscription.publish();
-    let dispatcherEvents = Rx.Observable.fromEventPattern(h => Dispatcher.register(h));
+    let dispatcherEvents = Rx.Observable.fromEventPattern(h => Dispatcher.register(h)).repeat();
+    
     let animeNewPost = dispatcherEvents
 	.filter(payload => payload.actionType === 'newAnimePost')
-	.selectMany(payload => $.ajax(Utils.post("/anime/" + payload.data.id, payload.data)))
+	.selectMany(payload => $.ajax(Utils.put("/anime/", payload.data)))
 	.selectMany(_ => $.ajax(Utils.get("/anime")))
-	.do(data => _posts = data);
+	.subscribe(data => _posts = data,
+		   _ => console.log("Error on new post"));
 
     let animeUpdatePost = dispatcherEvents
 	.filter(payload => payload.actionType === 'updateAnimePost')
-	.selectMany(payload => $.ajax(Utils.put("/anime/", payload.data)))
+	.selectMany(payload => $.ajax(Utils.post("/anime/" + payload.data.id, payload.data)))
 	.selectMany(_ => $.ajax(Utils.get("/anime")))
-	.do(data => _posts = data);
+	.subscribe(data => _posts = data,
+		   _ => console.log("Error on update new post");
 	    
 
     changes.connect();

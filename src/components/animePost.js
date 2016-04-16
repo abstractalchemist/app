@@ -9,7 +9,7 @@ import React from 'react'
  * state: data
  */
 export default React.createClass({
-    getIntialState() {
+    getInitialState() {
 	return { data: {} }
     },
     componentDidMount() {
