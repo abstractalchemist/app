@@ -2,31 +2,29 @@ import Utils from '../utils'
 import Dispatcher from '../util/dispatcher'
 
 export default (function() {
-    let _view;
     let _posts;
-    
-    let viewChange = Rx.Observable.fromEventPattern( h => Dispatcher.register(h) )
-	.filter(payload => { return payload.actionType === 'animeEdit' })
-	.do(({view, id, rev}) => _view = {view,id,rev});
 
     let animeSubscription = Rx.Observable.timer(500, 30000)
 	.flatMap(_ => $.ajax(Utils.get("/anime"))).retry().do(data => _posts = data);
 
-    let changes = Rx.Observable.merge(animeSubscription, viewChange).publish();
+    let changes = animeSubscription.publish();
+    let dispatcherEvents = Rx.Observable.fromEventPattern(h => Dispatcher.register(h));
+    let animeNewPost = dispatcherEvents
+	.filter(payload => payload.actionType === 'newAnimePost')
+	.selectMany(payload => $.ajax(Utils.post("/anime/" + payload.data.id, payload.data)))
+	.selectMany(_ => $.ajax(Utils.get("/anime")))
+	.do(data => _posts = data);
 
-    let animeNewPost = Rx.Observable.fromEventPattern( h => Dispatcher.register(h) )
-	.filter(payload => payload.actionType == 'newAnimePost')
-	.selectMany(payload => {
-	    return $.ajax(Utils.post("/anime/", payload.data));
-	});
+    let animeUpdatePost = dispatcherEvents
+	.filter(payload => payload.actionType === 'updateAnimePost')
+	.selectMany(payload => $.ajax(Utils.put("/anime/", payload.data)))
+	.selectMany(_ => $.ajax(Utils.get("/anime")))
+	.do(data => _posts = data);
+	    
 
     changes.connect();
     
     let store = {
-	updatePost(id, rev, entry) {
-	    console.log("updating posts " + id)
-	    Rx.Observable.fromPromise($.ajax(Utils.post("/anime/" + id, {entry:entry, _rev: rev})));
-	},
 	post(id) {
 	    return Rx.Observable.fromPromise($.ajax(Utils.get("/anime/" + id)));
 	},

@@ -10,27 +10,23 @@ export default (function() {
     let admin = true;
     window.onSignIn = function(user) {
 	_auth = gapi.auth2.getAuthInstance();
-	/*
-	_auth.isSignedIn.listen(val => {
-	    console.log("sigin event received %s", val);
-	    $('signed-in-cell').text(val);
-	    
+	_auth.isSignedIn.listen( isSigningIn => {
+	    console.log("is signing in? %s", isSigningIn);
 	});
-	*/
 	_auth.currentUser.listen(user => {
 	    console.log("current user %s", user);
 	    _currentUser = user;
 	    window.sessionStorage.setItem("jwt", user.getAuthResponse().id_token);
-	});
-	_currentUser = user;
-	window.sessionStorage.setItem("jwt", user.getAuthResponse().id_token);
-	signInSubject.onNext(_currentUser);
-	Rx.Observable.fromPromise($.ajax({ method: "GET", url: "/anime/authorized" })).subscribe(_ => {
-	    console.log("authorized to add post to anime page");
+	    Rx.Observable.just(user).subscribe(signInSubject);
+	    Rx.Observable.fromPromise($.ajax({ method: "GET", url: "/anime/authorized" })).subscribe(_ => {
+		console.log("authorized to add post to anime page");
 	},
-										      _ => {
-											  console.log("not authorized to add post to anime page");
-										      });
+												     _ => {
+													 console.log("not authorized to add post to anime page");
+												     });
+	    
+	});
+
     };
     
     

@@ -3,7 +3,8 @@ import IndexBanner from './indexbanner'
 import Carousel from './carousel'
 import AnimeStore from '../stores/anime'
 import ImageGallery from '../stores/image_gallery'
-import Dispatcher from '../util/dispatcher'
+import AnimePost from './animePost'
+import AnimeActions from '../actions/anime'
 import Auth from '../stores/auth'
 import Rx from 'rx'
 
@@ -37,16 +38,34 @@ const Pagination = React.createClass({
     }
 });
 
+/*
+ * props: title - title of article to display
+ *        titleId - id of article to display
+ *        editable - true if the current viewer can edit the article in question
+ *        img - url to the image to display in the card
+ *        entry - excerpt to show 
+ *        rev - revision number in couchdb ; needed for update
+ */
 const AnimeItem = React.createClass({
+    getInitialState() {
+	return { editing: false }
+    },
     componentDidMount() {
 
     },
     onEdit(evt) {
-	Dispatcher.dispatch({actionType:"animeEdit", view:"edit",id: this.props.titleId, rev:this.props.rev});
-	console.log("on edit clicked");
+	this.setState({ editing: true });
 	evt.preventDefault();
     },
     componentWillUnmount() {
+    },
+    editPost(data) {
+	AnimeActions.updateAnimePost({ titleId: this.props.titleId,
+				       title: this.data.title,
+				       img: this.props.img,
+				       entry: this.data.excerpt,
+				       rev: this.props.rev,
+				       content: this.data.content });
     },
     render() {
 	return ( <div className="col s12">
@@ -79,26 +98,14 @@ const AnimeItem = React.createClass({
 		 <p>{this.props.entry}</p>
 		 </div>
 		 </div>
+		 {( _=> {
+		     if(this.state.editing)
+			 return ( <AnimePost modalId={"update-" + this.props.title} handleUpdate={this.editPost} title={this.props.title} excerpt={this.props.entry}/> )
+		 })()}
 		 </div>
 	       );
     }
 });
-
-const PageEdit = React.createClass({
-    render() {
-	return (<div className="col m4" >
-		<div className="card" style={{height:"800px"}}>
-		<div className="card-content">
-		<span className="card-title">Whats New In Anime</span>
-		<div className="card-action">
-		</div>
-		</div>
-		</div>
-		</div>
-	       )
-    }
-})
-
 
 const Col = React.createClass({
     render() {
@@ -116,30 +123,21 @@ const Col = React.createClass({
 
 const NewAnimePost = React.createClass({
     getInitialState() {
-	return { data: {} }
+	return {};
     },
     componentDidMount() {
 	$('.modal-trigger').leanModal();
     },
-    handleChange(evt) {
-	let target = evt.currentTarget;
-	let dataObj = this.state.data;
-	dataObj[target.name] = target.value;
-	this.setState({ data: dataObj });
-	
-	evt.preventDefault();
-    },
-    submitNew(evt) {
+    submitNew(data) {
 	console.log("Submit new log");
-	Dispatcher.dispatcher({actionType: "newAnimePost", data:this.state.data});
-	this.setState({data: {}});
-	evt.preventDefault();
+	AnimeActions.newAnimePost({ titleId : undefined,
+				    title: this.data.title,
+				    img: undefined,
+				    entry: this.data.excerpt,
+				    rev: undefined,
+				    content: this.data.content })
     },
-    cancel(evt) {
-	$('#newAnimeModal').closeModal();
-	this.setState({data: {}});
-	evt.preventDefault();
-    },
+   
     render() {
 	return (<div className="col s12">
 		<div className="card">
@@ -149,70 +147,9 @@ const NewAnimePost = React.createClass({
 		<div className="card-action">
 		</div>
 		</div>
-
-		<div id="newAnimeModal" className="modal">
-		<div className="modal-content">
-		<h4>New Post</h4>
-		<form>
-		<div className="container">
-		<div className="row">
-		<div className="input-field col s12">
-		<input type="text" name="title" onChange={this.handleChange}></input>
-		<label>Title</label>
-		</div>
-		</div>
-
-		<div className="row">
-		<div className="input-field col s12">
-		<input type="text" name="imageHeader" onChange={this.handleChange}></input>
-		<label>Image Header</label>
-		</div>
-		</div>
-
-		
-		<div className="row">
-		<div className="input-field col s12">
-		<textarea name="excerpt" style={{height:"5rem"}} onChange={this.handleChange} className="materialize-textarea"></textarea>
-		<label>Excerpt</label>
-		</div>
-		</div>
-
-		<div className="row">
-		<div className="input-field col s12">
-		<textarea name="content" style={{height:"15rem"}} onChange={this.handleChange} className="materialize-textarea"></textarea>
-		<label>Content</label>
-		</div>
-		</div>
-
-		<div className="row">
-		<div className="input-field col s12">
-		<textarea name="links" style={{height:"2rem"}} onChange={this.handleChange} className="materialize-textarea"></textarea>
-		<label>Links</label>
-		</div>
-		</div>
-		
-		<div className="row">
-		<div className="input-field col s3">
-		<button className="btn" onClick={this.submitNew}>Create New</button>
-		</div>
-		<div className="input-field col s2">
-		<button className="btn" onClick={this.cancel}>Cancel</button>
-		</div>
-		</div>
-		
-		</div>
-		</form>
-		
-		</div>
-		</div>
-		
+		<AnimePost modalId="newAnimeModal" handleUpdate={this.submitNew}/>
 		</div>
 	       )
-    }
-});
-
-const AnimePost = React.createClass({
-    render() {
     }
 });
 
@@ -261,6 +198,7 @@ const AnimeView = React.createClass({
 		 })()
 		 }
 		 </div>
+		
 		 <div className="container center">
 		 <Pagination pageCount="5" activePage="1" />
 		 </div>
@@ -270,79 +208,18 @@ const AnimeView = React.createClass({
     }
 });
 
-const AnimeEdit = React.createClass({
-    getInitialState() {
-	return {};
-    },
-    back(evt) {
-	Dispatcher.dispatch({actionType:"animeEdit"})
-	evt.preventDefault();
-    },
-    post(evt) {
-
-	AnimeStore.updatePost(this.props.id, this.props.rev, this.state.postBody);
-	Dispatcher.dispatch({actionType:"animeEdit"})
-	evt.preventDefault();
-    },
-    textChange(evt) {
-	this.setState({postBody: evt.target.value});
-    },
-    render() {
-	return ( <div className="container">
-		 <h1>{ this.props.title }</h1>
-		 <div className="row">
-		 <form className="col s12">
-		 <div className="row">
-		 <div className="input-field col s12">
-		 <textarea id="textarea1" className="materialize-textarea" value={this.state.postBody} onChange={this.textChange}></textarea>
-		 <label for="textarea1">Textarea</label>
-		 </div>
-		 <input type="submit" onClick={this.post} className="btn waves-effect waves-light"></input>
-		 </div>
-		 </form>
-		 <a href="#" onClick={this.back} className="btn waves-effect waves-light">Back To View</a>
-		 </div>
-		 </div>
-	);
-    }
-});
 
 export default React.createClass({
     getInitialState() {
-	return { view: ( <AnimeView /> )};
-    },
-    findLocations({view, id, title, rev}) {
-	
-	switch(view) {
-	case 'edit':
-	    return ( <AnimeEdit id={id} title={title} rev={rev}/> )
-	default:
-	    return ( <AnimeView /> )
-	}
+	return { };
     },
     componentDidMount() {
-	this.subToken = AnimeStore.registerCallback(_ => {
-	    let view;
-	    if(view = AnimeStore.view()) {
-		console.log("Changing view to " + view);
-		if(view.id != undefined) {
-		    AnimeStore.post(view.id).subscribe(data => {
-			console.log("using title " + data.title);
-			view.title = data.title;
-			this.setState({ view: this.findLocations(view)});
-		    });
-		}
-		else
-		    this.setState({ view: this.findLocations(view)});
-	    }
-	});
     },
     componentWillUnmount() {
-	this.subToken.dispose();
     },
     render() {
 	return (<div id="anime">
-		{ this.state.view }
+		<AnimeView />
 		</div>
 	       )
     }
