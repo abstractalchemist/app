@@ -22,7 +22,7 @@ export default (function() {
 	.selectMany(payload => $.ajax(Utils.post("/anime/" + payload.data.id, payload.data)))
 	.selectMany(_ => $.ajax(Utils.get("/anime")))
 	.subscribe(data => _posts = data,
-		   _ => console.log("Error on update new post");
+		   _ => console.log("Error on update new post"));
 	    
 
     changes.connect();

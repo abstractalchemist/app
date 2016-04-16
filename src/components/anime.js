@@ -2,7 +2,6 @@ import React from 'react/dist/react'
 import IndexBanner from './indexbanner'
 import Carousel from './carousel'
 import AnimeStore from '../stores/anime'
-import ImageGallery from '../stores/image_gallery'
 import AnimePost from './animePost'
 import AnimeActions from '../actions/anime'
 import Auth from '../stores/auth'
@@ -129,7 +128,7 @@ const NewAnimePost = React.createClass({
 	$('.modal-trigger').leanModal();
     },
     submitNew(data) {
-	console.log("Submit new log");
+
 	AnimeActions.newAnimePost({ titleId : undefined,
 				    title: data.title,
 				    img: undefined,

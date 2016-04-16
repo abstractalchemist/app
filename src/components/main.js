@@ -9,6 +9,8 @@ import Dispatcher from '../util/dispatcher'
 import FRC from './frc'
 import FRCStore from '../stores/frc'
 import Samples from './samples'
+import Images from './images'
+import ImageStore from '../stores/images'
 
 const Front = React.createClass({
 
@@ -36,6 +38,8 @@ export default React.createClass({
 			       { name: "Samples", href: "samples.html", desc: "", id: "samples", view: <Samples />}];
 	if(FRCStore.authorized())
 	    publicLocations.push({ name: "FRC", href: "frc.html", desc: "", id: "frc", view: <FRC />});
+	if(ImageStore.authorized())
+	    publicLocations.push({ name: "Images", href: "images.html", desc: "", id: "images", view: <Images />});
 	return publicLocations;
     },
     findLocation(locationId) {
