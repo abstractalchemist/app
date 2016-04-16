@@ -14,6 +14,12 @@ export default (function() {
 
     let changes = Rx.Observable.merge(animeSubscription, viewChange).publish();
 
+    let animeNewPost = Rx.Observable.fromEventPattern( h => Dispatcher.register(h) )
+	.filter(payload => payload.actionType == 'newAnimePost')
+	.selectMany(payload => {
+	    return $.ajax(Utils.post("/anime/", payload.data));
+	});
+
     changes.connect();
     
     let store = {

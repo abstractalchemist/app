@@ -4,6 +4,8 @@ import Carousel from './carousel'
 import AnimeStore from '../stores/anime'
 import ImageGallery from '../stores/image_gallery'
 import Dispatcher from '../util/dispatcher'
+import Auth from '../stores/auth'
+import Rx from 'rx'
 
 const Pagination = React.createClass({
     getInitialState() {
@@ -47,10 +49,10 @@ const AnimeItem = React.createClass({
     componentWillUnmount() {
     },
     render() {
-	return ( <div className="col m4">
+	return ( <div className="col s12">
 		 <div className="card">
 		 <div className="card-image waves-effect waves-block waves-light">
-		 <img className="activator" src={this.props.img} style={{width:"400",marginLeft:"auto",marginRight:"auto"}}></img>
+		 <img className="activator" src={this.props.img} style={{marginLeft:"auto",marginRight:"auto"}}></img>
 		 </div>
 		 <div className="card-content">
 		 <span className="card-title activator grey-text text-darken-4">{this.props.title}<i className="material-icons right">more_vert</i></span>
@@ -82,6 +84,138 @@ const AnimeItem = React.createClass({
     }
 });
 
+const PageEdit = React.createClass({
+    render() {
+	return (<div className="col m4" >
+		<div className="card" style={{height:"800px"}}>
+		<div className="card-content">
+		<span className="card-title">Whats New In Anime</span>
+		<div className="card-action">
+		</div>
+		</div>
+		</div>
+		</div>
+	       )
+    }
+})
+
+
+const Col = React.createClass({
+    render() {
+	return (<div className={"col s" + this.props.width}>
+		<div className="row">
+		{( _=> {
+		    return this.props.data;
+		})()
+		}
+		</div>
+		</div>
+	       );
+    }
+});
+
+const NewAnimePost = React.createClass({
+    getInitialState() {
+	return { data: {} }
+    },
+    componentDidMount() {
+	$('.modal-trigger').leanModal();
+    },
+    handleChange(evt) {
+	let target = evt.currentTarget;
+	let dataObj = this.state.data;
+	dataObj[target.name] = target.value;
+	this.setState({ data: dataObj });
+	
+	evt.preventDefault();
+    },
+    submitNew(evt) {
+	console.log("Submit new log");
+	Dispatcher.dispatcher({actionType: "newAnimePost", data:this.state.data});
+	this.setState({data: {}});
+	evt.preventDefault();
+    },
+    cancel(evt) {
+	$('#newAnimeModal').closeModal();
+	this.setState({data: {}});
+	evt.preventDefault();
+    },
+    render() {
+	return (<div className="col s12">
+		<div className="card">
+		<div className="card-content">
+		<a className="modal-trigger" href="#newAnimeModal"><span className="card-title">Whats new in Anime?</span></a>
+		</div>
+		<div className="card-action">
+		</div>
+		</div>
+
+		<div id="newAnimeModal" className="modal">
+		<div className="modal-content">
+		<h4>New Post</h4>
+		<form>
+		<div className="container">
+		<div className="row">
+		<div className="input-field col s12">
+		<input type="text" name="title" onChange={this.handleChange}></input>
+		<label>Title</label>
+		</div>
+		</div>
+
+		<div className="row">
+		<div className="input-field col s12">
+		<input type="text" name="imageHeader" onChange={this.handleChange}></input>
+		<label>Image Header</label>
+		</div>
+		</div>
+
+		
+		<div className="row">
+		<div className="input-field col s12">
+		<textarea name="excerpt" style={{height:"5rem"}} onChange={this.handleChange} className="materialize-textarea"></textarea>
+		<label>Excerpt</label>
+		</div>
+		</div>
+
+		<div className="row">
+		<div className="input-field col s12">
+		<textarea name="content" style={{height:"15rem"}} onChange={this.handleChange} className="materialize-textarea"></textarea>
+		<label>Content</label>
+		</div>
+		</div>
+
+		<div className="row">
+		<div className="input-field col s12">
+		<textarea name="links" style={{height:"2rem"}} onChange={this.handleChange} className="materialize-textarea"></textarea>
+		<label>Links</label>
+		</div>
+		</div>
+		
+		<div className="row">
+		<div className="input-field col s3">
+		<button className="btn" onClick={this.submitNew}>Create New</button>
+		</div>
+		<div className="input-field col s2">
+		<button className="btn" onClick={this.cancel}>Cancel</button>
+		</div>
+		</div>
+		
+		</div>
+		</form>
+		
+		</div>
+		</div>
+		
+		</div>
+	       )
+    }
+});
+
+const AnimePost = React.createClass({
+    render() {
+    }
+});
+
 const AnimeView = React.createClass({
     getInitialState() {
 	return { currentLow: 0, currentHigh: 10, current: [] };
@@ -99,16 +233,33 @@ const AnimeView = React.createClass({
 	return ( <div>
 		 <IndexBanner title="Anime And Manga" img="background4.jpg" />
 		 <div className="container">
-		 <div className="row">
 		 {( () => {
 		     if(this.state.current) {
-			 return this.state.current.map( ({id, title,entry,img,editable, _rev: rev}) => {
+			 let col0 = [],
+			     col1 = [], col2 = [], col3 = [];
+			 let current = Rx.Observable.fromArray(this.state.current);
+			 if(Auth.authorized())
+			     col0.push(<NewAnimePost />);
+			 current = Rx.Observable.fromArray(col0).concat(current.map(({id, title,entry,img,editable, _rev: rev}) => {
 			     return ( <AnimeItem key={id} titleId={id} title={ title } entry={ entry } img={ img } editable={ editable } rev={ rev }/> )
-			 })
+			 }));
+			 current.filter( (_, index) => index % 4 == 0).toArray().subscribe(data => col0 = data);
+			 current.filter( (_, index) => index % 4 == 1).toArray().subscribe(data => col1 = data);
+			 current.filter( (_, index) => index % 4 == 2).toArray().subscribe(data => col2 = data);
+			 current.filter( (_, index) => index % 4 == 3).toArray().subscribe(data => col3 = data);
+			 return (<div className="row">
+				 <Col data={col0} width={3} key="col0" />
+				 <Col data={col1} width={3} key="col1" />
+				 <Col data={col2} width={3} key="col2" />
+				 <Col data={col3} width={3} key="col3" />
+				 </div>
+			 );
+			 
+			 return current;
+			 
 		     }
 		 })()
 		 }
-		 </div>
 		 </div>
 		 <div className="container center">
 		 <Pagination pageCount="5" activePage="1" />

@@ -6,7 +6,9 @@ import Parallax from './parallax'
 import Footer from './footer'
 import Anime from './anime'
 import Dispatcher from '../util/dispatcher'
-import FRC from '../stores/frc'
+import FRC from './frc'
+import FRCStore from '../stores/frc'
+import Samples from './samples'
 
 const Front = React.createClass({
 
@@ -31,9 +33,9 @@ export default React.createClass({
     locations() {
 	let publicLocations = [{ name: "Anime", href: "anime.html", desc: "", id: "anime", view: <Anime /> },
 			       { name: "Programming", href: "programming.html", desc: "", id: "programming" },
-			       { name: "Samples", href: "samples.html", desc: "", id: "samples", view: <FRC />}];
-	if(FRC.authorized())
-	    publicLocations.push({ name: "FRC", href: "frc.html", desc: "", id: "frc"});
+			       { name: "Samples", href: "samples.html", desc: "", id: "samples", view: <Samples />}];
+	if(FRCStore.authorized())
+	    publicLocations.push({ name: "FRC", href: "frc.html", desc: "", id: "frc", view: <FRC />});
 	return publicLocations;
     },
     findLocation(locationId) {
