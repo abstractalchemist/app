@@ -44,6 +44,7 @@ const Pagination = React.createClass({
  *        img - url to the image to display in the card
  *        entry - excerpt to show 
  *        rev - revision number in couchdb ; needed for update
+ *        fullArticle* - callback that is invoked when the full article wants to be seen
  */
 const AnimeItem = React.createClass({
     getInitialState() {
@@ -65,6 +66,10 @@ const AnimeItem = React.createClass({
 				       entry: data.excerpt,
 				       rev: this.props.rev,
 				       content: data.content });
+    },
+    fullArticle(evt) {
+	this.props.fullArticle(this.props.titleId);
+	evt.preventDefault();
     },
     render() {
 	return ( <div className="col s12">
@@ -95,6 +100,7 @@ const AnimeItem = React.createClass({
 		 <div className="card-reveal">
 		 <span className="card-title grey-text text-darken-4">{this.props.title}<i className="material-icons right">close</i></span>
 		 <p>{this.props.entry}</p>
+		 <a href="#" onClick={this.fullArticle}>Full Article</a>
 		 </div>
 		 </div>
 		 {( _=> {
@@ -152,18 +158,60 @@ const NewAnimePost = React.createClass({
     }
 });
 
+/*
+ * props: schedule
+ */
+const AnimeSchedule = React.createClass({
+    render() {
+	return (<div className="col s12">
+		<div className="card">
+
+		<div className="card-image">
+		</div>
+
+		<div className="card-content">
+		<span className="card-title activator">Anime Watch Schedule</span>
+		</div>
+
+		<div className="card-reveal">
+		<span className="card-title">Anime Watch Schedule</span>
+		<ul className="collection">
+		{( _ => {
+		    if(this.props.schedule) {
+			return this.props.schedule.map( data => {
+			    return (<li className="collection-item avatar"><span className="title">{data}</span></li>)
+			})
+		    }
+		})()
+		}
+		</ul>				      
+		</div>
+		</div>
+		</div>
+	       )
+    }
+});
+
+/*
+ * props: fullArticle
+ */
 const AnimeView = React.createClass({
     getInitialState() {
-	return { currentLow: 0, currentHigh: 10, current: [] };
+	return { currentLow: 0, currentHigh: 10, current: [], schedule: [] };
     },
     componentWillMount() {
 
 	this.subToken = AnimeStore.registerCallback(_ => {
-	    this.setState({ current : AnimeStore.posts() })
+	    this.setState({ current : AnimeStore.posts(), schedule : ["Gate S2", "The Asterisk War S2", "Yuki Yuna Is A Hero"] })
+	    
 	});
     },
     componentWillUnmount() {
 	this.subToken.dispose();
+    },
+    fullArticle(id) {
+	this.props.fullArticle(id);
+	console.log('full article of id %s', id);
     },
     render() {
 	return ( <div>
@@ -176,8 +224,9 @@ const AnimeView = React.createClass({
 			 let current = Rx.Observable.fromArray(this.state.current);
 			 if(Auth.authorized())
 			     col0.push(<NewAnimePost />);
+			 col0.push(<AnimeSchedule schedule={this.state.schedule} />);
 			 current = Rx.Observable.fromArray(col0).concat(current.map(({id, title,entry,img,editable, _rev: rev}) => {
-			     return ( <AnimeItem key={id} titleId={id} title={ title } entry={ entry } img={ img } editable={ editable } rev={ rev }/> )
+			     return ( <AnimeItem key={id} titleId={id} title={ title } entry={ entry } img={ img } editable={ editable } rev={ rev } fullArticle={this.fullArticle}/> )
 			 }));
 			 current.filter( (_, index) => index % 4 == 0).toArray().subscribe(data => col0 = data);
 			 current.filter( (_, index) => index % 4 == 1).toArray().subscribe(data => col1 = data);
@@ -201,24 +250,67 @@ const AnimeView = React.createClass({
 		 <div className="container center">
 		 <Pagination pageCount="5" activePage="1" />
 		 </div>
-		 </div>
-		 
+		 </div> 
 	       );
     }
 });
 
+/*
+ * props: id* - id of the article to display
+ *        back* - callback to return to previous screen
+ */
+const AnimeArticle = React.createClass({
+    getInitialState() {
+	return {}
+    },
+    componentDidMount() {
+	AnimeStore.getArticle(this.props.id).subscribe( ({title:title,content:content,img:img}) => {
+	    this.setState({ title: title, content: content,img:img})
+	});
+    },
+    back(evt) {
+	this.props.back();
+	evt.preventDefault();
+    },
+    render() {
+	return ( <div className="container">
+		 <div className="row">
+		 <h1 className="center-align">{this.state.title}</h1>
+		 
+		 <div className="col s8 offset-s2">
+		 <img src={this.state.img} />
+		 </div>
+
+		 <p>
+		 {this.state.content}
+		 </p>
+		 <div className="col s12">
+		 <a href="#" onClick={this.back}>Back</a>
+		 </div>
+		 
+		 </div>
+		 </div>
+	       )
+    }
+});
 
 export default React.createClass({
     getInitialState() {
-	return { };
+	return { view : <AnimeView fullArticle={this.fullArticle} />};
     },
     componentDidMount() {
     },
     componentWillUnmount() {
     },
+    back() {
+	this.setState({ view: <AnimeView fullArticle={this.fullArticle} />});
+    },
+    fullArticle(id) {
+	this.setState({ view: <AnimeArticle id={id} back={this.back}/> });
+    },
     render() {
 	return (<div id="anime">
-		<AnimeView />
+		{this.state.view}
 		</div>
 	       )
     }
