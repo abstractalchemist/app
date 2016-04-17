@@ -73,9 +73,13 @@ const AnimeItem = React.createClass({
     },
     render() {
 	return ( <div className="col s12">
-		 <div className="card">
-		 <div className="card-image waves-effect waves-block waves-light">
-		 <img className="activator" src={this.props.img} style={{marginLeft:"auto",marginRight:"auto"}}></img>
+		 <div className="card" >
+		 <div className="card-image waves-effect waves-block waves-light" style={{minHeight: "100px"}}>
+		 {( _ => {
+		     if(this.props.img)
+			 return (<img className="activator" src={this.props.img} style={{marginLeft:"auto",marginRight:"auto"}}></img>)
+		 })()
+		 }
 		 </div>
 		 <div className="card-content">
 		 <span className="card-title activator grey-text text-darken-4">{this.props.title}<i className="material-icons right">more_vert</i></span>
@@ -137,7 +141,7 @@ const NewAnimePost = React.createClass({
 
 	AnimeActions.newAnimePost({ titleId : undefined,
 				    title: data.title,
-				    img: undefined,
+				    img: data.img,
 				    entry: data.excerpt,
 				    rev: undefined,
 				    content: data.content })
@@ -280,10 +284,11 @@ const AnimeArticle = React.createClass({
 		 <div className="col s8 offset-s2">
 		 <img src={this.state.img} />
 		 </div>
-
+		 <div className="col s12">
 		 <p>
 		 {this.state.content}
 		 </p>
+		 </div>
 		 <div className="col s12">
 		 <a href="#" onClick={this.back}>Back</a>
 		 </div>

@@ -1,6 +1,8 @@
+import Config from './config'
+
 export default (function() {
 
-    let base = "http://localhost:3000";
+    let base = Config.dataUrl();
     
     return {
 	put(url, data) {

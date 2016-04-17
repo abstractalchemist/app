@@ -42,6 +42,9 @@ export default (function() {
 	},
 	unregisterCallback(token) {
 	    token.dispose();
+	},
+	getArticle(id) {
+	    return Rx.Observable.fromPromise($.ajax(Utils.get("/anime/" + id)));
 	}
     };
 

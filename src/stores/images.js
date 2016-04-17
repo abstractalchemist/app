@@ -1,4 +1,5 @@
 import Utils from '../utils'
+import Config from '../config'
 
 export default (function() {
     let images = Rx.Observable.fromPromise($.ajax(Utils.get("/anime/images")));
@@ -11,7 +12,7 @@ export default (function() {
 	    return images;
 	},
 	imageUrl(id) {
-	    return "http://localhost:3000/anime/images/" + id
+	    return Config.dataUrl() + "/anime/images/" + id
 	}
     }
 })()

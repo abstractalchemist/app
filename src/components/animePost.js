@@ -45,7 +45,7 @@ export default React.createClass({
 
 		<div className="row">
 		<div className="input-field col s12">
-		<input type="text" name="imageHeader" onChange={this.handleChange}></input>
+		<input type="text" name="img" onChange={this.handleChange}></input>
 		<label>Image Header</label>
 		</div>
 		</div>
