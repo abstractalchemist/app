@@ -47,21 +47,40 @@ const ImageCol = React.createClass({
 
 export default React.createClass({
     getInitialState() {
-	return { images: undefined }
+	return { images: undefined, start:0, end:20 }
     },
     componentDidMount() {
 	ImageStore.images().subscribe(data => {
 	    this.setState({ images: data })
 	});
+	let currentLength = 3000;
+	let inc = 1000;
+
+	Rx.Observable.fromEvent(window, 'scroll')
+	    .selectMany( _ => {
+		return Rx.Observable.just((window.scrollY + window.innerHeight) - document.documentElement.offsetHeight);
+	    })
+	    .debounce(500)
+	    .do(distance => {
+		if(distance >= -50 ) {
+		    if(this.state.end < this.state.images.length)
+			this.setState({end : this.state.end + 10})
+		}
+		    
+	    })
+		.subscribe(d => {
+		    console.log("scroll distance: " + d + "; currentLength: " + currentLength)
+		},
+			   _ => {});
     },
     render() {
 	
 	return (<div className="container">
-
+		
 		{( _ => {
 		    if(this.state.images) {
 			let img0, img1, img2, img3;
-			let imageObservable = Rx.Observable.fromArray(this.state.images);
+			let imageObservable = Rx.Observable.fromArray(this.state.images).take(this.state.end);
 			imageObservable.filter( (_, index) => index % 4 == 0)
 			    .toArray()
 			    .subscribe(data => img0 = data);
@@ -74,7 +93,7 @@ export default React.createClass({
 			imageObservable.filter( (_, index) => index % 4 == 3)
 			    .toArray()
 			    .subscribe(data => img3 = data);
-			return  (<div className="row">
+			return  (<div className="row" id="image-container">
 				 <ImageCol width={3} images={img0} />
 				 <ImageCol width={3} images={img1} />
 				 <ImageCol width={3} images={img2} />
