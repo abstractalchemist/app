@@ -3,6 +3,7 @@ import Dispatcher from '../util/dispatcher'
 
 export default (function() {
     let _posts;
+   
 
     let animeSubscription = Rx.Observable.timer(500, 30000)
 	.flatMap(_ => $.ajax(Utils.get("/anime"))).retry().do(data => _posts = data);
@@ -23,6 +24,8 @@ export default (function() {
 	.selectMany(_ => $.ajax(Utils.get("/anime")))
 	.subscribe(data => _posts = data,
 		   _ => console.log("Error on update new post"));
+
+    let _schedule = Rx.Observable.fromPromise($.ajax(Utils.get("/anime/schedule")));
 	    
 
     changes.connect();
@@ -42,6 +45,9 @@ export default (function() {
 	},
 	unregisterCallback(token) {
 	    token.dispose();
+	},
+	schedule() {
+	    return _schedule;
 	},
 	getArticle(id) {
 	    return Rx.Observable.fromPromise($.ajax(Utils.get("/anime/" + id)));

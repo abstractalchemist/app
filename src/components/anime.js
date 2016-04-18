@@ -6,6 +6,7 @@ import AnimePost from './animePost'
 import AnimeActions from '../actions/anime'
 import Auth from '../stores/auth'
 import Rx from 'rx'
+import ImageStore from '../stores/images'
 
 const Pagination = React.createClass({
     getInitialState() {
@@ -77,7 +78,7 @@ const AnimeItem = React.createClass({
 		 <div className="card-image waves-effect waves-block waves-light" style={{minHeight: "100px"}}>
 		 {( _ => {
 		     if(this.props.img)
-			 return (<img className="activator" src={this.props.img} style={{marginLeft:"auto",marginRight:"auto"}}></img>)
+			 return (<img className="activator" src={ImageStore.imageUrl(this.props.img)} style={{marginLeft:"auto",marginRight:"auto"}}></img>)
 		 })()
 		 }
 		 </div>
@@ -163,7 +164,8 @@ const NewAnimePost = React.createClass({
 });
 
 /*
- * props: schedule
+ * props: schedule* - the current watch schedule
+ *        img - the current img
  */
 const AnimeSchedule = React.createClass({
     render() {
@@ -171,6 +173,7 @@ const AnimeSchedule = React.createClass({
 		<div className="card">
 
 		<div className="card-image">
+		<img src={ImageStore.imageUrl(this.props.img)} />
 		</div>
 
 		<div className="card-content">
@@ -206,9 +209,10 @@ const AnimeView = React.createClass({
     componentWillMount() {
 
 	this.subToken = AnimeStore.registerCallback(_ => {
-	    this.setState({ current : AnimeStore.posts(), schedule : ["Gate S2", "The Asterisk War S2", "Yuki Yuna Is A Hero"] })
+	    this.setState({ current : AnimeStore.posts()})
 	    
 	});
+	AnimeStore.schedule().subscribe(data => this.setState({ schedule: data }));
     },
     componentWillUnmount() {
 	this.subToken.dispose();
@@ -228,7 +232,7 @@ const AnimeView = React.createClass({
 			 let current = Rx.Observable.fromArray(this.state.current);
 			 if(Auth.authorized())
 			     col0.push(<NewAnimePost />);
-			 col0.push(<AnimeSchedule schedule={this.state.schedule} />);
+			 col0.push(<AnimeSchedule schedule={this.state.schedule.schedule} img={this.state.schedule.img} />);
 			 current = Rx.Observable.fromArray(col0).concat(current.map(({id, title,entry,img,editable, _rev: rev}) => {
 			     return ( <AnimeItem key={id} titleId={id} title={ title } entry={ entry } img={ img } editable={ editable } rev={ rev } fullArticle={this.fullArticle}/> )
 			 }));
