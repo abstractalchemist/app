@@ -13,6 +13,11 @@ export default React.createClass({
 	return { data: {} }
     },
     componentDidMount() {
+	let data = { title: this.props.title,
+		     excerpt: this.props.excerpt,
+		     content: this.props.content,
+		     links: this.props.links };
+	this.setState({ data: data });
     },
     cancel(evt) {
 	$('#' + this.props.modalId).closeModal();
@@ -38,7 +43,7 @@ export default React.createClass({
 		<div className="container">
 		<div className="row">
 		<div className="input-field col s12">
-		<input type="text" name="title" onChange={this.handleChange} value={this.props.title}></input>
+		<input type="text" name="title" onChange={this.handleChange} value={this.state.data.title}></input>
 		<label>Title</label>
 		</div>
 		</div>
@@ -53,21 +58,21 @@ export default React.createClass({
 		
 		<div className="row">
 		<div className="input-field col s12">
-		<textarea name="excerpt" style={{height:"5rem"}} onChange={this.handleChange} className="materialize-textarea" value={this.props.excerpt}></textarea>
+		<textarea name="excerpt" style={{height:"5rem"}} onChange={this.handleChange} className="materialize-textarea" value={this.state.data.excerpt}></textarea>
 		<label>Excerpt</label>
 		</div>
 		</div>
 
 		<div className="row">
 		<div className="input-field col s12">
-		<textarea name="content" style={{height:"15rem"}} onChange={this.handleChange} className="materialize-textarea" value={this.props.content}></textarea>
+		<textarea name="content" style={{height:"15rem"}} onChange={this.handleChange} className="materialize-textarea" value={this.state.data.content}></textarea>
 		<label>Content</label>
 		</div>
 		</div>
 
 		<div className="row">
 		<div className="input-field col s12">
-		<textarea name="links" style={{height:"2rem"}} onChange={this.handleChange} className="materialize-textarea" value={this.props.links}></textarea>
+		<textarea name="links" style={{height:"2rem"}} onChange={this.handleChange} className="materialize-textarea" value={this.state.data.links}></textarea>
 		<label>Links</label>
 		</div>
 		</div>

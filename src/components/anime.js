@@ -49,21 +49,21 @@ const Pagination = React.createClass({
  */
 const AnimeItem = React.createClass({
     getInitialState() {
-	return { editing: false }
+	return { }
     },
     componentDidMount() {
-
     },
     onEdit(evt) {
-	this.setState({ editing: true });
+	$('#update-article-' + this.props.titleId).openModal();
 	evt.preventDefault();
     },
     componentWillUnmount() {
     },
     editPost(data) {
-	AnimeActions.updateAnimePost({ titleId: this.props.titleId,
+	AnimeActions.updateAnimePost({ id: this.props.titleId,
 				       title: data.title,
 				       img: this.props.img,
+				       links: data.links.split(/\s/),
 				       entry: data.excerpt,
 				       rev: this.props.rev,
 				       content: data.content });
@@ -89,10 +89,10 @@ const AnimeItem = React.createClass({
 		 <a className="btn-floating btn-large red">
 		 <i className="large mdi-navigation-menu"></i>
 		 </a>
-		 <ul>
+		 <ul style={{ right: "0"  }}>
 		 {(() => {
 		     if(this.props.editable) {
-			 return ( <li key="edit"><a href="#" className="btn-floating red" onClick={this.onEdit}><i className="material-icons">mode_edit</i></a></li> );
+			 return ( <li key="edit"><a href={"#update-article-" + this.props.titleId} className="btn-floating red modal-trigger" onClick={this.onEdit}><i className="material-icons">mode_edit</i></a></li> );
 		     }
 		 })()
 		 }
@@ -109,8 +109,19 @@ const AnimeItem = React.createClass({
 		 </div>
 		 </div>
 		 {( _=> {
-		     if(this.state.editing)
-			 return ( <AnimePost modalId={"update-" + this.props.title} handleUpdate={this.editPost} title={this.props.title} excerpt={this.props.entry}/> )
+		     if(this.props.editable)
+			 return ( <AnimePost
+				  modalId={"update-article-" + this.props.titleId}
+				  handleUpdate={this.editPost}
+				  title={this.props.title}
+				  excerpt={this.props.entry}
+				  links={(_ => {
+				      console.log("getting links for " + this.props.links);
+				      if(this.props.links)
+					  return this.props.links.map(({link:link}) => link).join("\n")
+				      return undefined;
+				  })()
+					}/> )
 		 })()}
 		 </div>
 	       );
@@ -136,11 +147,10 @@ const NewAnimePost = React.createClass({
 	return {};
     },
     componentDidMount() {
-	$('.modal-trigger').leanModal();
     },
     submitNew(data) {
 
-	AnimeActions.newAnimePost({ titleId : undefined,
+	AnimeActions.newAnimePost({ id : undefined,
 				    title: data.title,
 				    img: data.img,
 				    entry: data.excerpt,
@@ -148,12 +158,16 @@ const NewAnimePost = React.createClass({
 				    rev: undefined,
 				    content: data.content })
     },
-   
+    modalOpen(evt) {
+	let linkTarget = evt.currentTarget;
+	$('#newAnimeModal').openModal();
+	evt.preventDefault();
+    },
     render() {
 	return (<div className="col s12">
 		<div className="card">
 		<div className="card-content">
-		<a className="modal-trigger" href="#newAnimeModal"><span className="card-title">Whats new in Anime?</span></a>
+		<a className="modal-trigger" onClick={this.modalOpen} href="#newAnimeModal"><span className="card-title">Whats new in Anime?</span></a>
 		</div>
 		<div className="card-action">
 		</div>
@@ -234,8 +248,16 @@ const AnimeView = React.createClass({
 			 if(Auth.authorized())
 			     col0.push(<NewAnimePost />);
 			 col0.push(<AnimeSchedule schedule={this.state.schedule.schedule} img={this.state.schedule.img} />);
-			 current = Rx.Observable.fromArray(col0).concat(current.map(({id, title,entry,img,editable, _rev: rev}) => {
-			     return ( <AnimeItem key={id} titleId={id} title={ title } entry={ entry } img={ img } editable={ editable } rev={ rev } fullArticle={this.fullArticle}/> )
+			 current = Rx.Observable.fromArray(col0).concat(current.map(({id, title,entry,img,editable, _rev: rev, links:links}) => {
+			     return ( <AnimeItem key={id}
+				      titleId={id}
+				      title={ title }
+				      entry={ entry }
+				      img={ img }
+				      editable={ editable }
+				      rev={ rev }
+				      links={links}
+				      fullArticle={this.fullArticle}/> )
 			 }));
 			 current.filter( (_, index) => index % 4 == 0).toArray().subscribe(data => col0 = data);
 			 current.filter( (_, index) => index % 4 == 1).toArray().subscribe(data => col1 = data);
@@ -316,7 +338,7 @@ const AnimeArticle = React.createClass({
 		 <ul className="collection">
 		 {( _ => {
 		     if(this.state.links) {
-			 return this.state.links.map( data => ( <li className="collection-item"><a href={data}>Link 1</a></li> ) );
+			 return this.state.links.map( ({title:title,link:link}) => ( <li className="collection-item"><a href={link}>{title}</a></li> ) );
 		     }
 		 })()
 		 }
