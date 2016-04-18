@@ -144,6 +144,7 @@ const NewAnimePost = React.createClass({
 				    title: data.title,
 				    img: data.img,
 				    entry: data.excerpt,
+				    links: data.links.split(/\s/),
 				    rev: undefined,
 				    content: data.content })
     },
@@ -173,7 +174,7 @@ const AnimeSchedule = React.createClass({
 		<div className="card">
 
 		<div className="card-image">
-		<img src={ImageStore.imageUrl(this.props.img)} />
+		<img className="activator" src={ImageStore.imageUrl(this.props.img)} />
 		</div>
 
 		<div className="card-content">
@@ -264,6 +265,23 @@ const AnimeView = React.createClass({
 });
 
 /*
+ * carousel to show screenshots 
+ *
+ * props: screenshots* - list of srcs for screenshots
+ */
+const AnimeScreenShots = React.createClass({
+    render() {
+	return ( <div className="carousel">
+		 {( _ => {
+		     return this.props.screenshots.map( data => ( <a className="carousel-item"><img src={data} className="materializedbox"/></a> ) );
+		 })()
+		 }
+		 </div>
+	       );
+    }
+});
+
+/*
  * props: id* - id of the article to display
  *        back* - callback to return to previous screen
  */
@@ -272,8 +290,8 @@ const AnimeArticle = React.createClass({
 	return {}
     },
     componentDidMount() {
-	AnimeStore.getArticle(this.props.id).subscribe( ({title:title,content:content,img:img}) => {
-	    this.setState({ title: title, content: content,img:img})
+	AnimeStore.getArticle(this.props.id).subscribe( ({title:title,content:content,img:img,links:links}) => {
+	    this.setState({ title: title, content: content,img:img,links:links})
 	});
     },
     back(evt) {
@@ -286,13 +304,34 @@ const AnimeArticle = React.createClass({
 		 <h1 className="center-align">{this.state.title}</h1>
 		 
 		 <div className="col s8 offset-s2">
-		 <img src={this.state.img} />
+		 <img src={ImageStore.imageUrl(this.state.img)} style={{minWidth: "60%"}}/>
 		 </div>
 		 <div className="col s12">
 		 <p>
 		 {this.state.content}
 		 </p>
 		 </div>
+		 
+		 <div className="col s12">
+		 <ul className="collection">
+		 {( _ => {
+		     if(this.state.links) {
+			 return this.state.links.map( data => ( <li className="collection-item"><a href={data}>Link 1</a></li> ) );
+		     }
+		 })()
+		 }
+		 </ul>
+		 </div>
+		 
+		 <div className="col s12">
+		 {( _ => {
+		     if(this.state.screenshots) {
+			 return <AnimeScreenShots  screenshots={this.state.screenshots} />;
+		     }
+		 })()
+		 }
+		 </div>
+		 
 		 <div className="col s12">
 		 <a href="#" onClick={this.back}>Back</a>
 		 </div>
