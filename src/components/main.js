@@ -11,6 +11,8 @@ import FRCStore from '../stores/frc'
 import Samples from './samples'
 import Images from './images'
 import ImageStore from '../stores/images'
+import Search from './search'
+import ViewActions from '../actions/view'
 
 const Front = React.createClass({
 
@@ -33,14 +35,15 @@ const Front = React.createClass({
 
 export default React.createClass({
     locations() {
-	let publicLocations = [{ name: "Anime", href: "anime.html", desc: "", id: "anime", view: <Anime /> },
-			       { name: "Programming", href: "programming.html", desc: "", id: "programming" },
-			       { name: "Samples", href: "samples.html", desc: "", id: "samples", view: <Samples />}];
+	let publicLocations = [{ name: "Anime", href: "/anime", desc: "", id: ViewActions.animeId(), view: <Anime /> },
+			       { name: "Programming", href: "/programming", desc: "", id: ViewActions.programmingId() },
+			       { name: "Samples", href: "/samples", desc: "", id: ViewActions.samplesId(), view: <Samples />},
+			       { name: "Search", href: "/search", desk: "", id: ViewActions.searchId(), noSection: true, view: <Search />}];
 	if(FRCStore.authorized())
-	    publicLocations.push({ name: "FRC", href: "frc.html", desc: "", id: "frc", view: <FRC />});
+	    publicLocations.push({ name: "FRC", href: "/frc", desc: "", id: ViewActions.frcId(), view: <FRC />});
 	if(ImageStore.authorized())
-	    publicLocations.push({ name: "Images", href: "images.html", desc: "", id: "images", view: <Images />});
-	return publicLocations;
+	    publicLocations.push({ name: "Images", href: "/images", desc: "", id: ViewActions.imagesId(), noSection: true, view: <Images />});
+ 	return publicLocations;
     },
     findLocation(locationId) {
 	return this.locations().find( ({ id, view }) => id === locationId );

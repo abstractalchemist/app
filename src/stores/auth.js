@@ -11,6 +11,10 @@ export default (function() {
     let signInSubject = new Rx.Subject();
     let admin = true;
     window.onSignIn = function(user) {
+	if(!user) {
+	    console.log("user undefined on login");
+	    return;
+	}
 	_auth = gapi.auth2.getAuthInstance();
 	let isSigningIn = Rx.Observable.fromEventPattern(h => _auth.isSignedIn.listen(h));
 	isSigningIn.subscribe(signInStatus => console.log("is signing in? %s", signInStatus));

@@ -38,6 +38,20 @@ const Pagination = React.createClass({
     }
 });
 
+const Tags = React.createClass({
+    render() {
+	return (<div>
+		{( _=> {
+		    return this.props.tags.map( data => {
+			return (<div className="chip">{data}</div>)
+		    })
+		})()
+		}
+		</div>
+	       );
+    }
+});
+
 /*
  * props: title - title of article to display
  *        titleId - id of article to display
@@ -83,6 +97,12 @@ const AnimeItem = React.createClass({
 		 }
 		 </div>
 		 <div className="card-content">
+		 {( _=> {
+		     if(this.props.tags) {
+			 return <Tags tags={this.props.tags} />;
+		     }
+		 })()
+		 }
 		 <span className="card-title activator grey-text text-darken-4">{this.props.title}<i className="material-icons right">more_vert</i></span>
 
 		 <div className="fixed-action-btn horizontal click-to-toggle" style={{position: "relative", top: "5px"}}>
@@ -200,8 +220,9 @@ const AnimeSchedule = React.createClass({
 		<ul className="collection">
 		{( _ => {
 		    if(this.props.schedule) {
-			return this.props.schedule.map( data => {
-			    return (<li className="collection-item avatar"><span className="title">{data}</span></li>)
+			console.log("current schedule: " + typeof(this.props.schedule));
+			return this.props.schedule.map( ({title:title,link:link}) => {
+			    return (<li className="collection-item avatar"><a href={link}><span className="title">{title}</span></a></li>)
 			})
 		    }
 		})()

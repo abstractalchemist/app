@@ -1,15 +1,33 @@
 import React from 'react/dist/react';
-import Dispatcher from '../util/dispatcher'
+//import Dispatcher from '../util/dispatcher'
 import Auth from '../stores/auth'
+import ViewActions from '../actions/view'
 
 const NavItem = React.createClass({
     itemClicked(evt) {
 	console.log("Changing to " + this.props.id);
-	Dispatcher.dispatch( { actionType: "viewChanged", view: this.props.id } );
+	//Dispatcher.dispatch( { actionType: "viewChanged", view: this.props.id } );
+	
+	ViewActions.view(this.props.id);
 	evt.preventDefault();
     },
     render() {
-	return ( <li><a href={ this.props.href } onClick={this.itemClicked}>{ this.props.name }</a></li> )
+	return ( <li><a href={ this.props.href } >{ this.props.name }</a></li> )
+    }
+});
+
+const Search = React.createClass({
+    render() {
+	return ( <form style={{margin:"0px 0px 0px 0px"}}>
+		 <div className="input-field">
+		 <input id="search-for-stuff" type="search" required>
+		 </input>
+		 <label htmlFor="search"><i className="material-icons">search</i></label>
+		 <i className="material-icons">close</i>
+		 </div>
+		 </form>
+	       )
+
     }
 });
 
@@ -33,13 +51,19 @@ export default React.createClass({
 	});
     },
     itemClicked(evt) {
-	Dispatcher.dispatch( { actionType: "viewChanged", view: "front" } );
+	//Dispatcher.dispatch( { actionType: "viewChanged", view: "front" } );
+	ViewActions.front();
+	evt.preventDefault();
+    },
+    search(evt) {
+	//Dispatcher.dispatch( { actionType: "viewChanged", view: "search" });
+	ViewAction.search();
 	evt.preventDefault();
     },
     render() {
 	return ( <nav className="white" role="navigation">
 		 <div className="nav-wrapper container">
-		 <a id="logo-container" href="#" className="brand-logo" onClick={this.itemClicked}>Logo</a>
+		 <a id="logo-container" href="/" className="brand-logo" onClick={this.itemClicked}>Logo</a>
 		 <ul className="right hide-on-med-and-down">
 		 { this.standardNav() }
 		 <li>
@@ -49,6 +73,10 @@ export default React.createClass({
 		     }
 		 })()
 		 }
+		 </li>
+
+		 <li>
+		 <a href="/search" ><i className="material-icons">search</i></a>
 		 </li>
 		 </ul>
 		 <ul className="side-nav">

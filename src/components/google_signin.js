@@ -17,13 +17,15 @@ export default React.createClass({
 		window.sessionStorage.setItem("jwt", data.token);
 	    });
 	    */
-//	}
+	//	}
+	if(window.gapi)
+	    gapi.signin2.render('signin', { onSuccess: window.onSignin });
     },
     
     render() {
 	return (<div className="row center">
 		<div className="col s1 offset-s5">
-		<div className="g-signin2" data-onsuccess="onSignIn" data-theme="dark"></div>
+		<div id="signin"></div>
 		</div>
 		</div>
 	       );

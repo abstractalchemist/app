@@ -26,8 +26,9 @@ export default React.createClass({
 		 <div className="row">
 
 		 { ( () => {
-		     const size = "m" + Math.floor(12/this.props.sections.length);
-		     return this.props.sections.map( ({ name, desc, icon, id }) => {
+		     let filtered = this.props.sections.filter(({noSection}) => !noSection);
+		     const size = "m" + Math.floor(12/filtered.length);
+		     return filtered.map( ({ name, desc, icon, id }) => {
 			 return ( <Section short={name} long={ desc } icon={ icon } size={ size } key={ id + "-section" }/> );
 		     })
 		 } )()
