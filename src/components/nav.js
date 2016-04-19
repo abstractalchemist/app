@@ -24,7 +24,7 @@ export default React.createClass({
     },
     componentDidMount() {
 	$('.button-collapse').sideNav();
-	Auth.register(user => {
+	Auth.registerSignInCallback(user => {
 	    this.setState({ user });
 	});
 	    

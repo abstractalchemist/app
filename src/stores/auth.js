@@ -8,6 +8,7 @@ let _auth;
 
 export default (function() {
 
+    let gapiLoadSubject = new Rx.Subject();
     let signInSubject = new Rx.Subject();
     let admin = true;
 
@@ -36,16 +37,22 @@ export default (function() {
 
     };
 
-    let signinSubject = new Rx.Subject();
+    Rx.Observable.fromEvent(window, 'gapiLoaded')
+	.do(evt => {
+	    console.log("event gapi: %s", evt);
+	})
+	.selectMany(evt => Rx.Observable.just(evt.detail))
+	.subscribe(gapiLoadSubject);
+    //let signinSubject = new Rx.Subject();
 
-    let gapiLoad = Rx.Observable.fromCallback(gapi.load);
-    let load = gapiLoad('auth2').selectMany( _ => {
-	gapi.auth2.init({ client_id: "281796100165-8fjodck6rd1rp95c28ms79jq2ka2i6jg.apps.googleusercontent.com",
-			  cookiepolicy: 'single_host_origin' });
-	return Rx.Observable.just(gapi.auth2.getAuthInstance());
+    //let gapiLoad = Rx.Observable.fromCallback(gapi.load);
+    //let load = gapiLoad('auth2').selectMany( _ => {
+//	gapi.auth2.init({ client_id: "281796100165-8fjodck6rd1rp95c28ms79jq2ka2i6jg.apps.googleusercontent.com",
+//			  cookiepolicy: 'single_host_origin' });
+//	return Rx.Observable.just(gapi.auth2.getAuthInstance());
 	
-    });
-    load.subscribe(signinSubject);
+  //  });
+    //load.subscribe(signinSubject);
 
    
     
@@ -70,8 +77,8 @@ export default (function() {
 	auth() {
 	    return _auth;
 	},
-	register(listener) {
-	    return signInSubject.subscribe(listener);
+	registerGapiLoad(listener) {
+	    return gapiLoadSubject.subscribe(listener);
 	},
 	authorized() {
 	    return admin;
@@ -79,8 +86,8 @@ export default (function() {
 	authSignin(auth) {
 	    _authSignin(auth)
 	},
-	registerSigninCallback(callback) {
-	    return signinSubject.subscribe(callback);
+	registerSignInCallback(callback) {
+	   return signInSubject.subscribe(callback);
 	}
     }
 })()

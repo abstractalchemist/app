@@ -26,15 +26,18 @@ export default React.createClass({
 	let failure = error => {
 	    console.log("error on signin: %s", err.error);
 	};
-	Auth.registerSigninCallback(auth  => {
-	    gapi.signin2.render('signin', { onSuccess: signin , onFailure: failure });
-	    console.log("rendering signin");
+	Auth.registerGapiLoad(gapi => {
+	    gapi.signin2.render('signin', { onSuccess: signin, onFailure: failure });
+	});
+//	Auth.registerSigninCallback(auth  => {
+//	    gapi.signin2.render('signin', { onSuccess: signin , onFailure: failure });
+//	    console.log("rendering signin");
 //	    auth.attachClickHandler(document.querySelector('#signin'), {}, signin, err => {
 		// occurs if element is immediately removed from pages, for example, if navigated to somewhere else
 //		
 //		auth.signIn();
 //	    });
-	});
+//	});
 
     },
     componentDidUpdate(nextprops,nextstate) {

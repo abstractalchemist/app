@@ -14,7 +14,14 @@
     <script src="node_modules/rx/dist/rx.all.min.js"></script>
     <script src="node_modules/page/page.js"></script>
     <script src="node_modules/materialize-css/dist/js/materialize.min.js"></script>
-    <script src="https://apis.google.com/js/platform.js"></script>
+    <script src="https://apis.google.com/js/platform.js?onload=loadGapi" async defer></script>
+    <script>
+      function loadGapi() {
+      console.log("Dispatch gapi load event");
+      window.dispatchEvent(new CustomEvent("gapiLoaded", {detail:gapi}));
+      }
+    </script>
+	
     <!-- script src="https://apis.google.com/js/api:client.js"></script -->
     <script src="dist/bundle.js"></script>
   </body>
