@@ -40,7 +40,7 @@ const Pagination = React.createClass({
 
 const Tags = React.createClass({
     render() {
-	return (<div>
+	return (<div className="section">
 		{( _=> {
 		    return this.props.tags.map( data => {
 			return (<div className="chip">{data}</div>)
@@ -100,6 +100,9 @@ const AnimeItem = React.createClass({
 		 {( _=> {
 		     if(this.props.tags) {
 			 return <Tags tags={this.props.tags} />;
+		     }
+		     else {
+			 console.log("Tags? " + this.props.tags);
 		     }
 		 })()
 		 }
@@ -269,9 +272,10 @@ const AnimeView = React.createClass({
 			 if(Auth.authorized())
 			     col0.push(<NewAnimePost />);
 			 col0.push(<AnimeSchedule schedule={this.state.schedule.schedule} img={this.state.schedule.img} />);
-			 current = Rx.Observable.fromArray(col0).concat(current.map(({id, title,entry,img,editable, _rev: rev, links:links}) => {
+			 current = Rx.Observable.fromArray(col0).concat(current.map(({id, title,entry,img,editable, _rev: rev, links:links, tags:tags}) => {
 			     return ( <AnimeItem key={id}
 				      titleId={id}
+				      tags={tags}
 				      title={ title }
 				      entry={ entry }
 				      img={ img }
