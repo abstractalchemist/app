@@ -1,5 +1,5 @@
 import React from 'react/dist/react'
-import GoogleSign from './google_signin'
+//import GoogleSign from './google_signin'
 //import SignIn from './signin'
 
 export default React.createClass({
@@ -21,7 +21,7 @@ export default React.createClass({
 
 		{( () => {
 		    if(this.props.signin) {
-			return ( <GoogleSign /> );
+			//return ( <GoogleSign /> );
 		    }
 		    else if(this.props.starting) {
 			return ( <div className="row center">

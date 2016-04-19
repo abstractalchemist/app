@@ -10,31 +10,56 @@ export default (function() {
 
     let signInSubject = new Rx.Subject();
     let admin = true;
-    window.onSignIn = function(user) {
-	if(!user) {
-	    console.log("user undefined on login");
-	    return;
-	}
-	_auth = gapi.auth2.getAuthInstance();
-	let isSigningIn = Rx.Observable.fromEventPattern(h => _auth.isSignedIn.listen(h));
+
+    let onSuccessAnimeAuthorized = _ => {
+	console.log("authorized to add post to anime page");
+    };
+    let onErrorAnimeAuthorized = _ => {
+	console.log("not authorized to add post to anime page");
+    };
+
+    
+    let _authSignin = myAuth => {
+	let isSigningIn = Rx.Observable.fromEventPattern(h => myAuth.isSignedIn.listen(h));
 	isSigningIn.subscribe(signInStatus => console.log("is signing in? %s", signInStatus));
-	let currentUserSignIn = Rx.Observable.fromEventPattern(h => _auth.currentUser.listen(h));
+//	let currentUserSignIn = Rx.Observable.fromEventPattern(h => myAuth.currentUser.listen(h));
+	let currentUserSignIn = Rx.Observable.merge(Rx.Observable.fromEventPattern(h => myAuth.currentUser.listen(h)), Rx.Observable.just(myAuth.currentUser.get()));
 	currentUserSignIn.subscribe(signInSubject);
 	currentUserSignIn.subscribe(user => {
 	    console.log("current user %s", user);
 	    _currentUser = user;
 	    window.sessionStorage.setItem("jwt", user.getAuthResponse().id_token);
-	    Rx.Observable.fromPromise($.ajax(Utils.get("/anime/authorized"))).subscribe(_ => {
-		console.log("authorized to add post to anime page");
-	},
-												     _ => {
-													 console.log("not authorized to add post to anime page");
-												     });
+	    Rx.Observable.fromPromise($.ajax(Utils.get("/anime/authorized"))).subscribe(onSuccessAnimeAuthorized, onErrorAnimeAuthorized);
 	    
 	});
 
+
     };
+
+    let signinSubject = new Rx.Subject();
+
+    let gapiLoad = Rx.Observable.fromCallback(gapi.load);
+    let load = gapiLoad('auth2').selectMany( _ => {
+	gapi.auth2.init({ client_id: "281796100165-8fjodck6rd1rp95c28ms79jq2ka2i6jg.apps.googleusercontent.com",
+			  cookiepolicy: 'single_host_origin' });
+	return Rx.Observable.just(gapi.auth2.getAuthInstance());
+	
+    });
+    load.subscribe(signinSubject);
+
+   
     
+    /*
+    window.onSignIn = (user) => {
+	if(!user) {
+	    console.log("user undefined on login");
+	    return;
+	}
+	console.log("signing in");
+	_auth = gapi.auth2.getAuthInstance();
+	_authSignin(_auth);
+    };
+    */
     
     return {
 	init() {
@@ -50,6 +75,12 @@ export default (function() {
 	},
 	authorized() {
 	    return admin;
+	},
+	authSignin(auth) {
+	    _authSignin(auth)
+	},
+	registerSigninCallback(callback) {
+	    return signinSubject.subscribe(callback);
 	}
     }
 })()

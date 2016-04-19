@@ -37,8 +37,7 @@ export default React.createClass({
     locations() {
 	let publicLocations = [{ name: "Anime", href: "/anime", desc: "", id: ViewActions.animeId(), view: <Anime /> },
 			       { name: "Programming", href: "/programming", desc: "", id: ViewActions.programmingId() },
-			       { name: "Samples", href: "/samples", desc: "", id: ViewActions.samplesId(), view: <Samples />},
-			       { name: "Search", href: "/search", desk: "", id: ViewActions.searchId(), noSection: true, view: <Search />}];
+			       { name: "Samples", href: "/samples", desc: "", id: ViewActions.samplesId(), view: <Samples />}];
 	if(FRCStore.authorized())
 	    publicLocations.push({ name: "FRC", href: "/frc", desc: "", id: ViewActions.frcId(), view: <FRC />});
 	if(ImageStore.authorized())

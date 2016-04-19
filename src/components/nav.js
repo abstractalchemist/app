@@ -2,6 +2,7 @@ import React from 'react/dist/react';
 //import Dispatcher from '../util/dispatcher'
 import Auth from '../stores/auth'
 import ViewActions from '../actions/view'
+import GoogleSignin from './google_signin'
 
 const NavItem = React.createClass({
     itemClicked(evt) {
@@ -16,21 +17,7 @@ const NavItem = React.createClass({
     }
 });
 
-const Search = React.createClass({
-    render() {
-	return ( <form style={{margin:"0px 0px 0px 0px"}}>
-		 <div className="input-field">
-		 <input id="search-for-stuff" type="search" required>
-		 </input>
-		 <label htmlFor="search"><i className="material-icons">search</i></label>
-		 <i className="material-icons">close</i>
-		 </div>
-		 </form>
-	       )
-
-    }
-});
-
+ 
 export default React.createClass({
     getInitialState() {
 	return {};
@@ -66,6 +53,11 @@ export default React.createClass({
 		 <a id="logo-container" href="/" className="brand-logo" onClick={this.itemClicked}>Logo</a>
 		 <ul className="right hide-on-med-and-down">
 		 { this.standardNav() }
+		 <li style={{height:"100%"}}>
+		 <div style={{margin: "10px 0px 10px 0px"}}>
+		 <GoogleSignin />
+		 </div>
+		 </li>
 		 <li>
 		 {( _ => {
 		     if(this.state.user) {
