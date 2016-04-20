@@ -9,3 +9,27 @@
 	overflow: inherit;
     }
 }
+
+@keyframes fadein {
+    from {
+	opacity: 0
+    }
+
+    to {
+	opacity: 1
+    }
+}
+
+@keyframes slideAndFadeIn {
+    from {
+	margin-top: 300%;
+	overflow: hidden;
+	opacity: 0;
+    }
+
+    to {
+	margin-top: 0%;
+	overflow: inherit;
+	opacity: 1
+    }
+}

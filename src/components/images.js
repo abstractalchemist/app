@@ -1,6 +1,7 @@
 import React from 'react'
 import ImageStore from '../stores/images.js'
 import Rx from 'rx'
+import Device from '../stores/device.js'
 
 /*
  * props: image - url of image to display
@@ -10,7 +11,7 @@ const ImageCard = React.createClass({
 	$('.materialboxed').materialbox();
     },
     render() {
-	return (<div className="col s12" style={{animation: "5s slidein"}} >
+	return (<div className="col s12" style={{animationDuration: "5s", animationName: "slideAndFadeIn", animationTimingFunction: "ease-in-out"}} >
 		<div className="card">
 		<div className="card-image">
 		<img src={this.props.image} className="materialboxed"/>
@@ -54,21 +55,26 @@ export default React.createClass({
     getInitialState() {
 	return { images: undefined, start:0, end:20 }
     },
+    selectColsFromDevice() {
+	if(Device.mobile());
+	    return 1;
+	return 4;
+    },
     componentDidMount() {
 	ImageStore.images().subscribe(data => {
 	    this.setState({ images: data })
-	    this.generateImageCols();
+	    this.generateImageCols(this.selectColsFromDevice());
 	});
 	let subscriber = d => {
-	    console.log("scroll distance %s", d);
-	    this.generateImageCols();
+//	    console.log("scroll distance %s", d);
+	    this.generateImageCols(this.selectColsFromDevice());
 	};
 	let errorHandler = err => console.log("Error in scroll algorithm: %s", err);
 	Rx.Observable.fromEvent(window, 'scroll')
 	    .debounce(100)
 	    .selectMany( _ => {
 		let imageHeight = Math.max( $('#images0 > div').height(),$('#images1 > div').height(),$('#images2 > div').height(),$('#images3 > div').height());
-		console.log("length is %s", imageHeight);
+//		console.log("length is %s", imageHeight);
 		return Rx.Observable.just((window.scrollY + window.innerHeight) - imageHeight);
 	    })
 	    .do(distance => {
@@ -81,28 +87,20 @@ export default React.createClass({
 		.subscribe(subscriber, errorHandler);
 
     },
-    generateImageCols() {
+    generateImageCols(colCount) {
 	if(this.state.images) {
-	    let img0, img1, img2, img3;
 	    
 	    let imageObservable = Rx.Observable.fromArray(this.state.images)
 		.take(this.state.end);
-	    
-	    
-	    imageObservable
-		.filter( (_, index) => index % 4 == 0)
-		.toArray()
-		.subscribe(data => this.setState({img0:data}));
-	    imageObservable.filter( (_, index) => index % 4 == 1)
-		.toArray()
-		.subscribe(data => this.setState({img1:data}));
-	    imageObservable.filter( (_, index) => index % 4 == 2)
-		.toArray()
-		.subscribe(data => this.setState({img2:data}));
-	    imageObservable.filter( (_, index) => index % 4 == 3)
-		.toArray()
-		.subscribe(data => this.setState({img3:data}));
-	    
+
+	    Rx.Observable.range(0, colCount)
+		.selectMany(col => imageObservable.filter( (_, index) => index % 4 == col).toArray())
+		.selectMany( (data, index) => {
+		    this.setState({['img' + index] : data});
+		    return Rx.Observable.fromArray(data);
+		    
+		})
+		.subscribe( _ => console.log("for init"));
 	}
     },
     render() {
@@ -110,12 +108,17 @@ export default React.createClass({
 	return (<div className="container">
 		
 		{( _ => {
-			return  (<div className="row" id="image-container">
-				 <ImageCol width={3} images={this.state.img0} key="images0" id="images0"/>
-				 <ImageCol width={3} images={this.state.img1} key="images1" id="images1"/>
-				 <ImageCol width={3} images={this.state.img2} key="images2" id="images2"/>
-				 <ImageCol width={3} images={this.state.img3} key="images3" id="images3"/>
-				 </div>)
+		    return  (<div className="row" id="image-container">
+			     {( _ => {
+				 let cols = this.selectColsFromDevice();
+				 let vecs = [];
+				 for(let i = 0; i < cols; ++i) {
+				     vecs.push( <ImageCol width={12/cols} images={this.state['img' + i]} key={"images" + i} id={"images" + i} /> );
+				 }
+				 return vecs;
+			     })()
+			     }
+			     </div>)
 		    
 		})()
 		}
