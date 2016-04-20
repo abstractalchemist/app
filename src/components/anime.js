@@ -137,6 +137,7 @@ const AnimeItem = React.createClass({
 		 {( _=> {
 		     if(this.props.editable)
 			 return ( <AnimePost
+				  img={( _=> { if(this.props.img) { if(this.props.img.startsWith('http')) return this.props.img; return decodeURIComponent(this.props.img) } })()}
 				  modalId={"update-article-" + this.props.titleId}
 				  handleUpdate={this.editPost}
 				  title={this.props.title}

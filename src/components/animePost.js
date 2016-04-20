@@ -19,6 +19,7 @@ export default React.createClass({
 		     excerpt: this.props.excerpt,
 		     content: this.props.content,
 		     tags: this.props.tags,
+		     img: this.props.img,
 		     links: this.props.links };
 	this.setState({ data: data });
     },
@@ -33,7 +34,7 @@ export default React.createClass({
     cancel(evt) {
 
 	if(!this.props.updating)
-	    this.replaceState({data: {}});
+	    this.replaceState({data: {excerpt:"",content:"",tags:"",links:"",img:""}});
 	$('#' + this.props.modalId).closeModal();
 	evt.preventDefault();
     },
@@ -70,7 +71,7 @@ export default React.createClass({
 
 		<div className="row">
 		<div className="input-field col s12">
-		<input type="text" name="img" onChange={this.handleChange}></input>
+		<input type="text" name="img" onChange={this.handleChange} value={this.state.data.img}></input>
 		<label>Image Header</label>
 		</div>
 		</div>
