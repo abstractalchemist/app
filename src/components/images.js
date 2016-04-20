@@ -12,16 +12,13 @@ const ImageCard = React.createClass({
     },
     render() {
 	return (<div className="col s12" style={{animationDuration: "5s", animationName: "slideAndFadeIn", animationTimingFunction: "ease-in-out"}} >
-		<div className="card">
-		<div className="card-image">
-		<img src={this.props.image} className="materialboxed"/>
-		</div>
-		<div className="card-content">
+		<div className="material-placeholder" style={{margin: "10px 10px 10px 10px"}}>
+		<img src={this.props.image} className="materialboxed" data-caption="an image" width="100%"/>
 		</div>
 		</div>
-		</div>
-	       )
+	       );
     }
+
 });
 
 
@@ -56,7 +53,7 @@ export default React.createClass({
 	return { images: undefined, start:0, end:20 }
     },
     selectColsFromDevice() {
-	if(Device.mobile());
+	if(Device.mobile())
 	    return 1;
 	return 4;
     },
@@ -100,7 +97,7 @@ export default React.createClass({
 		    return Rx.Observable.fromArray(data);
 		    
 		})
-		.subscribe( _ => console.log("for init"));
+		.subscribe( _ => {});
 	}
     },
     render() {
