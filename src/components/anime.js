@@ -23,13 +23,14 @@ const Pagination = React.createClass({
 	return ( <li key={"page-" + i} className={className}><a href="#!">{i}</a></li> );
 	
     },
+    componentDidMount() {
+	Rx.Observable.range(1, this.props.pageCount).map(this.page).toArray().subscribe(data => this.setState({pages:data}))
+    },
     render() {
 	return ( <ul className="pagination center">
 		 <li className="disabled"><a href="#!"><i className="material-icons">chevron_left</i></a></li>
 		 {( () => {
-		     let v = []
-		     Rx.Observable.range(1, this.props.pageCount).map(this.page).subscribe(data => v.push(data))
-		     return v;
+		     return this.state.pages;
 		 })()
 		 }
 		 <li className="waves-effect"><a href="#!"><i className="material-icons">chevron_right</i></a></li>
@@ -43,7 +44,7 @@ const Tags = React.createClass({
 	return (<div className="section">
 		{( _=> {
 		    return this.props.tags.map( data => {
-			return (<div className="chip">{data}</div>)
+			return (<div className="chip" key={data}>{data}</div>)
 		    })
 		})()
 		}
@@ -59,6 +60,7 @@ const Tags = React.createClass({
  *        img - url to the image to display in the card
  *        entry - excerpt to show 
  *        rev - revision number in couchdb ; needed for update
+ *        tags -
  *        fullArticle* - callback that is invoked when the full article wants to be seen
  */
 const AnimeItem = React.createClass({
@@ -77,9 +79,10 @@ const AnimeItem = React.createClass({
 	AnimeActions.updateAnimePost({ id: this.props.titleId,
 				       title: data.title,
 				       img: this.props.img,
-				       links: data.links.split(/\s/),
+				       links: (_=> { if(data.links) return data.link.split(/\s/) })(),
 				       entry: data.excerpt,
 				       rev: this.props.rev,
+				       tags: (_=> { if(data.tags) return data.tags.split(/\s/) })(),
 				       content: data.content });
     },
     fullArticle(evt) {
@@ -87,28 +90,28 @@ const AnimeItem = React.createClass({
 	evt.preventDefault();
     },
     render() {
-	return ( <div className="col s12">
+	return ( <div className="col s12" style={{animation: "6s slidein"}}>
 		 <div className="card" >
-		 <div className="card-image waves-effect waves-block waves-light" style={{minHeight: "100px"}}>
+		 <div className="card-image waves-effect waves-block waves-light" style={{minHeight: "100px"}} key={this.props.titleId + '-image'}>
 		 {( _ => {
 		     if(this.props.img)
 			 return (<img className="activator" src={ImageStore.imageUrl(this.props.img)} style={{marginLeft:"auto",marginRight:"auto"}}></img>)
 		 })()
 		 }
 		 </div>
-		 <div className="card-content">
+		 <div className="card-content" key={this.props.titleId + '-content'}>
 		 {( _=> {
 		     if(this.props.tags) {
 			 return <Tags tags={this.props.tags} />;
 		     }
-		     else {
-			 console.log("Tags? " + this.props.tags);
-		     }
+//		     else {
+//			 console.log("Tags? " + this.props.tags);
+//		     }
 		 })()
 		 }
-		 <span className="card-title activator grey-text text-darken-4">{this.props.title}<i className="material-icons right">more_vert</i></span>
+		 <span className="card-title activator grey-text text-darken-4" key={this.props.titleId + '-title'}>{this.props.title}<i className="material-icons right">more_vert</i></span>
 
-		 <div className="fixed-action-btn horizontal click-to-toggle" style={{position: "relative", top: "5px"}}>
+		 <div key={this.props.titleId + '-actions'} className="fixed-action-btn horizontal click-to-toggle" style={{position: "relative", top: "5px"}}>
 		 <a className="btn-floating btn-large red">
 		 <i className="large mdi-navigation-menu"></i>
 		 </a>
@@ -125,7 +128,7 @@ const AnimeItem = React.createClass({
  		 </div>
 		 </div>
 		 
-		 <div className="card-reveal">
+		 <div className="card-reveal" key={this.props.titleId + '-reveal'}>
 		 <span className="card-title grey-text text-darken-4">{this.props.title}<i className="material-icons right">close</i></span>
 		 <p>{this.props.entry}</p>
 		 <a href="#" onClick={this.fullArticle}>Full Article</a>
@@ -138,8 +141,10 @@ const AnimeItem = React.createClass({
 				  handleUpdate={this.editPost}
 				  title={this.props.title}
 				  excerpt={this.props.entry}
+				  updating={true}
+				  tags={( _ => { if(this.props.tags) return this.props.tags.join("\n") })()}
 				  links={(_ => {
-				      console.log("getting links for " + this.props.links);
+//				      console.log("getting links for " + this.props.links);
 				      if(this.props.links)
 					  return this.props.links.map(({link:link}) => link).join("\n")
 				      return undefined;
@@ -187,7 +192,7 @@ const NewAnimePost = React.createClass({
 	evt.preventDefault();
     },
     render() {
-	return (<div className="col s12">
+	return (<div className="col s12" style={{animation: "6s slidein"}}>
 		<div className="card">
 		<div className="card-content">
 		<a className="modal-trigger" onClick={this.modalOpen} href="#newAnimeModal"><span className="card-title">Whats new in Anime?</span></a>
@@ -207,7 +212,7 @@ const NewAnimePost = React.createClass({
  */
 const AnimeSchedule = React.createClass({
     render() {
-	return (<div className="col s12">
+	return (<div className="col s12" style={{animation: "6s slidein"}}>
 		<div className="card">
 
 		<div className="card-image">
@@ -225,7 +230,7 @@ const AnimeSchedule = React.createClass({
 		    if(this.props.schedule) {
 			console.log("current schedule: " + typeof(this.props.schedule));
 			return this.props.schedule.map( ({title:title,link:link}) => {
-			    return (<li className="collection-item avatar"><a href={link}><span className="title">{title}</span></a></li>)
+			    return (<li key={title} className="collection-item avatar"><a href={link}><span className="title">{title}</span></a></li>)
 			})
 		    }
 		})()
@@ -248,8 +253,8 @@ const AnimeView = React.createClass({
     componentWillMount() {
 
 	this.subToken = AnimeStore.registerCallback(_ => {
-	    this.setState({ current : AnimeStore.posts()})
-	    
+	    //this.setState({ current : AnimeStore.posts()})
+	    this.generateItems(AnimeStore.posts());
 	});
 	AnimeStore.schedule().subscribe(data => this.setState({ schedule: data }));
     },
@@ -260,45 +265,48 @@ const AnimeView = React.createClass({
 	this.props.fullArticle(id);
 	console.log('full article of id %s', id);
     },
+    generateItems(items) {
+	if(items) {
+	    let col0 = [],
+		col1 = [], col2 = [], col3 = [];
+	    let current = Rx.Observable.fromArray(items);
+	    if(Auth.authorized())
+		col0.push(<NewAnimePost key="newAnimePost"/>);
+	    col0.push(<AnimeSchedule schedule={this.state.schedule.schedule} img={this.state.schedule.img} key="watchSchedule"/>);
+	    current = Rx.Observable.fromArray(col0).concat(current.map(({id, title,entry,img,editable, _rev: rev, links:links, tags:tags}) => {
+		return ( <AnimeItem key={id}
+			 titleId={id}
+			 tags={tags}
+			 title={ title }
+			 entry={ entry }
+			 img={ img }
+			 editable={ editable }
+			 rev={ rev }
+			 links={links}
+			 fullArticle={this.fullArticle}/> )
+	    }));
+	    current.filter( (_, index) => index % 4 == 0).toArray().subscribe(data => this.setState({col0 : data}));
+	    current.filter( (_, index) => index % 4 == 1).toArray().subscribe(data => this.setState({col1 : data}));
+	    current.filter( (_, index) => index % 4 == 2).toArray().subscribe(data => this.setState({col2 : data}));
+	    current.filter( (_, index) => index % 4 == 3).toArray().subscribe(data => this.setState({col3 : data}));
+	}
+	
+    },
     render() {
 	return ( <div>
 		 <IndexBanner title="Anime And Manga" img="background4.jpg" />
 		 <div className="container">
 		 {( () => {
-		     if(this.state.current) {
-			 let col0 = [],
-			     col1 = [], col2 = [], col3 = [];
-			 let current = Rx.Observable.fromArray(this.state.current);
-			 if(Auth.authorized())
-			     col0.push(<NewAnimePost />);
-			 col0.push(<AnimeSchedule schedule={this.state.schedule.schedule} img={this.state.schedule.img} />);
-			 current = Rx.Observable.fromArray(col0).concat(current.map(({id, title,entry,img,editable, _rev: rev, links:links, tags:tags}) => {
-			     return ( <AnimeItem key={id}
-				      titleId={id}
-				      tags={tags}
-				      title={ title }
-				      entry={ entry }
-				      img={ img }
-				      editable={ editable }
-				      rev={ rev }
-				      links={links}
-				      fullArticle={this.fullArticle}/> )
-			 }));
-			 current.filter( (_, index) => index % 4 == 0).toArray().subscribe(data => col0 = data);
-			 current.filter( (_, index) => index % 4 == 1).toArray().subscribe(data => col1 = data);
-			 current.filter( (_, index) => index % 4 == 2).toArray().subscribe(data => col2 = data);
-			 current.filter( (_, index) => index % 4 == 3).toArray().subscribe(data => col3 = data);
-			 return (<div className="row">
-				 <Col data={col0} width={3} key="col0" />
-				 <Col data={col1} width={3} key="col1" />
-				 <Col data={col2} width={3} key="col2" />
-				 <Col data={col3} width={3} key="col3" />
-				 </div>
-			 );
+		     return (<div className="row">
+			     <Col data={this.state.col0} width={3} key="col0" id="col0"/>
+			     <Col data={this.state.col1} width={3} key="col1" id="col1"/>
+			     <Col data={this.state.col2} width={3} key="col2" id="col2"/>
+			     <Col data={this.state.col3} width={3} key="col3" id="col3"/>
+			     </div>
+			    );
 			 
-			 return current;
+		
 			 
-		     }
 		 })()
 		 }
 		 </div>

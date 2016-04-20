@@ -5,7 +5,9 @@ import React from 'react'
  *        excerpt - excerpt to display in article card
  *        content - content to show for full
  *        links - additional links associated with article
+ *        tags - tags to set for the article
  *        handleUpdate* - callback to handle updates to parent
+ *        updating - whether this modal is updating or creating a new article
  * state: data
  */
 export default React.createClass({
@@ -16,12 +18,23 @@ export default React.createClass({
 	let data = { title: this.props.title,
 		     excerpt: this.props.excerpt,
 		     content: this.props.content,
+		     tags: this.props.tags,
 		     links: this.props.links };
 	this.setState({ data: data });
     },
+    /*componentWillReceiveProps(nextProps) {
+	let data = { title: this.props.title,
+		     excerpt: this.props.excerpt,
+		     content: this.props.content,
+		     tags: this.props.tags,
+		     links: this.props.links };
+	this.setState({ data: data });
+    },*/
     cancel(evt) {
+
+	if(!this.props.updating)
+	    this.replaceState({data: {}});
 	$('#' + this.props.modalId).closeModal();
-	this.setState({data: {}});
 	evt.preventDefault();
     },
     handleChange(evt) {
@@ -31,11 +44,18 @@ export default React.createClass({
     },
     submitNew(evt) {
 	console.log("updating or creating new: %s", this.state.data);
-	this.props.handleUpdate(this.state.data);
+	try {
+	    this.props.handleUpdate(this.state.data);
+	}
+	catch(error) {
+	    console.log("error");
+	}
 	this.cancel(evt);
 
     },
     render() {
+	//console.log("rendering anime post; title is %s, excerpt is %s, id is %s", this.state.data.title, this.state.data.excerpt, this.props.modalId);
+	
 	return (<div id={this.props.modalId} className="modal">
 		<div className="modal-content">
 		<h4>New Post</h4>
@@ -76,10 +96,23 @@ export default React.createClass({
 		<label>Links</label>
 		</div>
 		</div>
+
+		<div className="row">
+		<div className="input-field col s12">
+		<textarea name="tags" style={{height:"2rem"}} onChange={this.handleChange} className="materialize-textarea" value={this.state.data.tags}></textarea>
+		<label>Tags</label>
+		</div>
+		</div>
 		
 		<div className="row">
 		<div className="input-field col s3">
-		<button className="btn" onClick={this.submitNew}>Create New</button>
+		<button className="btn" onClick={this.submitNew}>{
+		    (_ => {
+			if(this.props.updating)
+			    return "Update"
+			return "Create New"
+		    })()
+		}</button>
 		</div>
 		<div className="input-field col s2">
 		<button className="btn" onClick={this.cancel}>Cancel</button>

@@ -1,0 +1,11 @@
+@keyframes slidein {
+    from {
+	margin-top: 300%;
+	overflow: hidden;
+    }
+
+    to {
+	margin-top: 0%;
+	overflow: inherit;
+    }
+}
