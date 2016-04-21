@@ -28,6 +28,9 @@ export default (function() {
 	frontId() {
 	    return 'front';
 	},
+	conventionId() {
+	    return 'convention';
+	},
 	anime() {
 	    _view(this.animeId());
 	},
@@ -48,6 +51,9 @@ export default (function() {
 	},
 	front() {
 	    _view(this.frontId());
+	},
+	convention() {
+	    _view(this.conventionId());
 	},
 	view(id) {
 	    

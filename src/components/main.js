@@ -14,6 +14,7 @@ import ImageStore from '../stores/images'
 import Search from './search'
 import ViewActions from '../actions/view'
 import Auth from '../stores/auth'
+import Convention from './convention'
 
 const Front = React.createClass({
 
@@ -60,8 +61,9 @@ export default React.createClass({
 		
 	    });
 	    let publicLocations = [{ name: "Anime", href: "/anime", desc: "", id: ViewActions.animeId(), view: <Anime /> },
+				   { name: "Convention", href: "/convention", desc: "", id: ViewActions.conventionId(), view: <Convention /> },
 				   { name: "Programming", href: "/programming", desc: "", id: ViewActions.programmingId() },
-			       { name: "Samples", href: "/samples", desc: "", id: ViewActions.samplesId(), view: <Samples />}];
+				   { name: "Samples", href: "/samples", desc: "", id: ViewActions.samplesId(), view: <Samples />}];
 	    if(frcAccess)
 		publicLocations.push({ name: "FRC", href: "/frc", desc: "", id: ViewActions.frcId(), view: <FRC />});
 	    if(imagesAccess)

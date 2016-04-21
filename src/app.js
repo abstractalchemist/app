@@ -23,6 +23,11 @@ $(document).ready(() => {
     page('/images', _ => {
 	ViewActions.images();
     });
+    page('/convention', _ => {
+	ViewActions.convention();
+    });
+    page('/samples', _ => {
+    });
     page('/', _ => {
 	console.log("default login");
 	ViewActions.front();

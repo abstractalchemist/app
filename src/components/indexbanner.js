@@ -2,6 +2,12 @@ import React from 'react/dist/react'
 //import GoogleSign from './google_signin'
 //import SignIn from './signin'
 
+/*
+ * props: title
+ *        description
+ *        starting
+ *        img
+ */
 export default React.createClass({
     componentDidMount() {
 	$('.parallax').parallax();
