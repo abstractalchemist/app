@@ -2,7 +2,7 @@ import React from 'react'
 import ImageStore from '../stores/images.js'
 import Rx from 'rx'
 import Device from '../stores/device.js'
-
+import Auth from '../stores/auth'
 /*
  * props: image - url of image to display
  */
@@ -13,7 +13,11 @@ const ImageCard = React.createClass({
     render() {
 	return (<div className="col s12" style={{animationDuration: "5s", animationName: "slideAndFadeIn", animationTimingFunction: "ease-in-out"}} >
 		<div className="material-placeholder" style={{margin: "10px 10px 10px 10px"}}>
-		<img src={this.props.image} className="materialboxed" data-caption="an image" width="100%"/>
+		<img src={( _ => {
+		    
+		    return this.props.image + "?token=" + Auth.token();
+	 	})()
+		} className="materialboxed" data-caption="an image" width="100%"/>
 		</div>
 		</div>
 	       );
@@ -82,6 +86,7 @@ export default React.createClass({
 		
 	    })
 		.subscribe(subscriber, errorHandler);
+
 
     },
     generateImageCols(colCount) {

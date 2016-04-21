@@ -13,6 +13,7 @@ import Images from './images'
 import ImageStore from '../stores/images'
 import Search from './search'
 import ViewActions from '../actions/view'
+import Auth from '../stores/auth'
 
 const Front = React.createClass({
 
@@ -33,7 +34,9 @@ const Front = React.createClass({
     }
 });
 
+
 export default React.createClass({
+    /*
     locations() {
 	let publicLocations = [{ name: "Anime", href: "/anime", desc: "", id: ViewActions.animeId(), view: <Anime /> },
 			       { name: "Programming", href: "/programming", desc: "", id: ViewActions.programmingId() },
@@ -44,23 +47,60 @@ export default React.createClass({
 	    publicLocations.push({ name: "Images", href: "/images", desc: "", id: ViewActions.imagesId(), noSection: true, view: <Images />});
  	return publicLocations;
     },
+    */
+    setLocations() {
+	return Auth.checkAllAccess().selectMany(data => {
+	    let frcAccess = false;
+	    let imagesAccess = false;
+	    data.forEach(i => {
+		if(i.accessImages)
+		    imagesAccess = true;
+		if(i.accessFrc)
+		    frcAccess = true
+		
+	    });
+	    let publicLocations = [{ name: "Anime", href: "/anime", desc: "", id: ViewActions.animeId(), view: <Anime /> },
+				   { name: "Programming", href: "/programming", desc: "", id: ViewActions.programmingId() },
+			       { name: "Samples", href: "/samples", desc: "", id: ViewActions.samplesId(), view: <Samples />}];
+	    if(frcAccess)
+		publicLocations.push({ name: "FRC", href: "/frc", desc: "", id: ViewActions.frcId(), view: <FRC />});
+	    if(imagesAccess)
+		publicLocations.push({ name: "Images", href: "/images", desc: "", id: ViewActions.imagesId(), noSection: true, view: <Images />});
+ 	    return Rx.Observable.fromArray(publicLocations);
+
+	}).toArray();
+    },
+
     findLocation(locationId) {
-	return this.locations().find( ({ id, view }) => id === locationId );
+	//return this.locations().find( ({ id, view }) => id === locationId );
+	if(this.state.locations)
+	    return this.state.locations.find(({ id, view }) => id === locationId );
     },
     getInitialState() {
-	return { currentView : <Front locations={ this.locations() }/> };
+	//return { currentView : <Front locations={ this.locations() }/> };
+	return { currentView: undefined, locations: undefined }
     },
     componentDidMount() {
-	let src = Rx.Observable.fromEventPattern(h => Dispatcher.register(h))
+	let viewDispatch = Rx.Observable.fromEventPattern(h => Dispatcher.register(h))
 	    .filter(payload => payload.actionType === 'viewChanged')
-	    .map(payload => {
-		if(payload.view === 'front')
-		    return ( <Front locations={ this.locations() } /> );
-		return this.findLocation(payload.view).view;
+	    .pluck('view');
+	let viewSubject = new Rx.ReplaySubject();
+	viewDispatch.subscribe(viewSubject);
+	let locationsDispatch = this.setLocations()
+	    .do(locations => {
+		let frontPage = <Front locations={locations} />;
+		this.setState({ locations: locations, front: frontPage, currentView: frontPage });
 	    });
-
-	this.viewSub = src.subscribe(view => this.setState({ currentView: view}));
-
+	locationsDispatch.selectMany(locations => { 
+	    return viewSubject
+		.map(view => {
+		    if(view === 'front')
+			return this.state.front
+		    return this.findLocation(view).view;
+		});
+	}).subscribe(view => this.setState({ currentView: view}), error => console.log("Error setting view: " + error));
+	
+	
     },
     componentDidUpdate() {
 
@@ -70,7 +110,7 @@ export default React.createClass({
     },
     render() {
 	return (<div>
-		<Nav locations={this.locations()}/>
+		<Nav locations={this.state.locations}/>
 		{this.state.currentView}
 		</div>
 	       );

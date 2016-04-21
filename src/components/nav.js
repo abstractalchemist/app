@@ -33,9 +33,13 @@ export default React.createClass({
 	$('.button-collapse').sideNav();
     },
     standardNav() {
-	return this.props.locations.map( ({ name, href, id }) => {
-	    return ( <NavItem key={ id + "-nav" } href={ href } name={ name } id={ id } /> );
-	});
+	if(this.props.locations) {
+	 //   console.log("mapping %s", this.props.locations);
+	    return this.props.locations.map( ({ name, href, id }) => {
+		return ( <NavItem key={ id + "-nav" } href={ href } name={ name } id={ id } /> );
+	    });
+	}
+	return [];
     },
     itemClicked(evt) {
 	//Dispatcher.dispatch( { actionType: "viewChanged", view: "front" } );

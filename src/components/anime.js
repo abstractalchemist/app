@@ -7,6 +7,7 @@ import AnimeActions from '../actions/anime'
 import Auth from '../stores/auth'
 import Rx from 'rx'
 import ImageStore from '../stores/images'
+import Device from '../stores/device'
 
 const Pagination = React.createClass({
     getInitialState() {
@@ -251,11 +252,16 @@ const AnimeView = React.createClass({
     getInitialState() {
 	return { currentLow: 0, currentHigh: 10, current: [], schedule: [] };
     },
+    selectColsBasedOnDevice() {
+	if(Device.mobile())
+	    return 1;
+	return 4;
+    },
     componentWillMount() {
 
 	this.subToken = AnimeStore.registerCallback(_ => {
 	    //this.setState({ current : AnimeStore.posts()})
-	    this.generateItems(AnimeStore.posts());
+	    this.generateItems(AnimeStore.posts(), this.selectColsBasedOnDevice())
 	});
 	AnimeStore.schedule().subscribe(data => this.setState({ schedule: data }));
     },
@@ -266,14 +272,18 @@ const AnimeView = React.createClass({
 	this.props.fullArticle(id);
 	console.log('full article of id %s', id);
     },
-    generateItems(items) {
+    generateItems(items, colCount) {
 	if(items) {
-	    let col0 = [],
-		col1 = [], col2 = [], col3 = [];
+	    console.log("generating %s cols", colCount);
+//	    let col0 = [],
+//		col1 = [], col2 = [], col3 = [];
 	    let current = Rx.Observable.fromArray(items);
+	    let col0 = [];
+	    
 	    if(Auth.authorized())
 		col0.push(<NewAnimePost key="newAnimePost"/>);
 	    col0.push(<AnimeSchedule schedule={this.state.schedule.schedule} img={this.state.schedule.img} key="watchSchedule"/>);
+	    
 	    current = Rx.Observable.fromArray(col0).concat(current.map(({id, title,entry,img,editable, _rev: rev, links:links, tags:tags}) => {
 		return ( <AnimeItem key={id}
 			 titleId={id}
@@ -286,10 +296,20 @@ const AnimeView = React.createClass({
 			 links={links}
 			 fullArticle={this.fullArticle}/> )
 	    }));
+	    /*
 	    current.filter( (_, index) => index % 4 == 0).toArray().subscribe(data => this.setState({col0 : data}));
 	    current.filter( (_, index) => index % 4 == 1).toArray().subscribe(data => this.setState({col1 : data}));
 	    current.filter( (_, index) => index % 4 == 2).toArray().subscribe(data => this.setState({col2 : data}));
 	    current.filter( (_, index) => index % 4 == 3).toArray().subscribe(data => this.setState({col3 : data}));
+	    */
+	    Rx.Observable.range(0, colCount)
+		.selectMany(col => current.filter( (_, index) => index % 4 == col).toArray())
+		.select( (data, index) => {
+		    console.log("setting state to " + data + " and index " + index)
+		    this.setState({ ['col' + index ] : data });
+		})
+		.subscribe(_ => {});
+			 
 	}
 	
     },
@@ -299,10 +319,15 @@ const AnimeView = React.createClass({
 		 <div className="container">
 		 {( () => {
 		     return (<div className="row">
-			     <Col data={this.state.col0} width={3} key="col0" id="col0"/>
-			     <Col data={this.state.col1} width={3} key="col1" id="col1"/>
-			     <Col data={this.state.col2} width={3} key="col2" id="col2"/>
-			     <Col data={this.state.col3} width={3} key="col3" id="col3"/>
+			     {( _ => {
+				 let cols = this.selectColsBasedOnDevice();
+				 console.log("cols is " + cols);
+				 let vec = [];
+				 for(let i = 0; i < cols; ++i)
+				     vec.push(<Col data={this.state["col" + i]} width={12/cols} key={"col" + i} id={"col" + i}/>);
+				 return vec;
+			     })()
+			     }
 			     </div>
 			    );
 			 

@@ -1,12 +1,15 @@
 import Utils from '../utils'
 import Config from '../config'
+import Auth from './auth'
 
 export default (function() {
     let images = Rx.Observable.fromPromise($.ajax(Utils.get("/anime/images")));
     return {
 	
-	authorized() {
-	    return true;
+	authorized(callback) {
+	    if(callback)
+		return Auth.checkImageAccess(callback);
+	    return false;
 	},
 	images() {
 	    return images;
