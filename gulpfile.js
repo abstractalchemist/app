@@ -9,7 +9,8 @@ var gutil = require('gulp-util');
 var sourcemaps = require('gulp-sourcemaps');
 var assign = require('lodash.assign');
 var babel = require('babelify');
-//var process = require('process');
+var replace = require('gulp-replace');
+var fs = require('fs');
 
 // add custom browserify options here
 var customOpts = {
@@ -29,8 +30,20 @@ if(!process.env.PRODUCTION)
     b.on('update', bundle); // on any dep update, runs the bundler
 b.on('log', gutil.log); // output build logs to terminal
 
+
+
 function bundle() {
+    fs.readFile('./src/config.js.tmpl', 'utf8', function(err, data) {
+	
+	fs.writeFile('./src/config.js', data.replace('${url}', (function() {
+	    if(process.env.PRODUCTION) {
+		return "/";
+	    }
+	    return "http://localhost:5984";
+	})()), { encoding : "utf8", flag: "w"});
+    })
     if(!process.env.PRODUCTION) {
+	
 	return b.bundle()
 	// log errors if they happen
             .on('error', gutil.log.bind(gutil, 'Browserify Error'))
