@@ -270,11 +270,11 @@ const AnimeView = React.createClass({
     },
     fullArticle(id) {
 	this.props.fullArticle(id);
-	console.log('full article of id %s', id);
+//	console.log('full article of id %s', id);
     },
     generateItems(items, colCount) {
 	if(items) {
-	    console.log("generating %s cols", colCount);
+//	    console.log("generating %s cols", colCount);
 //	    let col0 = [],
 //		col1 = [], col2 = [], col3 = [];
 	    let current = Rx.Observable.fromArray(items);
@@ -296,19 +296,13 @@ const AnimeView = React.createClass({
 			 links={links}
 			 fullArticle={this.fullArticle}/> )
 	    }));
-	    /*
-	    current.filter( (_, index) => index % 4 == 0).toArray().subscribe(data => this.setState({col0 : data}));
-	    current.filter( (_, index) => index % 4 == 1).toArray().subscribe(data => this.setState({col1 : data}));
-	    current.filter( (_, index) => index % 4 == 2).toArray().subscribe(data => this.setState({col2 : data}));
-	    current.filter( (_, index) => index % 4 == 3).toArray().subscribe(data => this.setState({col3 : data}));
-	    */
 	    Rx.Observable.range(0, colCount)
 		.selectMany(col => current.filter( (_, index) => index % 4 == col).toArray())
 		.select( (data, index) => {
-		    console.log("setting state to " + data + " and index " + index)
+//		    console.log("setting state to " + data + " and index " + index)
 		    this.setState({ ['col' + index ] : data });
 		})
-		.subscribe(_ => {});
+		.subscribe(_ => this.setState({recievedData:true}));
 			 
 	}
 	
@@ -319,9 +313,13 @@ const AnimeView = React.createClass({
 		 <div className="container">
 		 {( () => {
 		     return (<div className="row">
+
 			     {( _ => {
+				 if(!this.state.recievedData)
+				     return (<div className="progress"><div className="indeterminate"></div></div> );
+
 				 let cols = this.selectColsBasedOnDevice();
-				 console.log("cols is " + cols);
+//				 console.log("cols is " + cols);
 				 let vec = [];
 				 for(let i = 0; i < cols; ++i)
 				     vec.push(<Col data={this.state["col" + i]} width={12/cols} key={"col" + i} id={"col" + i}/>);

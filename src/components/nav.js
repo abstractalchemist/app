@@ -3,6 +3,7 @@ import React from 'react/dist/react';
 import Auth from '../stores/auth'
 import ViewActions from '../actions/view'
 import GoogleSignin from './google_signin'
+import GoogleSignOut from './google_signout'
 
 const NavItem = React.createClass({
     itemClicked(evt) {
@@ -25,7 +26,10 @@ export default React.createClass({
     componentDidMount() {
 	$('.button-collapse').sideNav();
 	Auth.registerSignInCallback(user => {
-	    this.setState({ user });
+	    if(user.isSignedIn())
+		this.setState({ user });
+	    else
+		this.setState({ user: undefined });
 	});
 	    
     },
@@ -58,8 +62,18 @@ export default React.createClass({
 		 <ul className="right hide-on-med-and-down">
 		 { this.standardNav() }
 		 <li style={{height:"100%"}}>
-		 <div style={{margin: "10px 0px 10px 0px"}}>
+		 <div className="valign-wrapper" style={{height:"100%"}}>
+		 <div className="valign">
 		 <GoogleSignin />
+		 </div>
+		 </div>
+		 
+		 </li>
+		 <li>
+ 		 <div className="valign-wrapper" style={{height:"100%"}}>
+		 <div className="valign">
+		 <GoogleSignOut />
+		 </div>
 		 </div>
 		 </li>
 		 <li>

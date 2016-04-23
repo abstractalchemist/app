@@ -8,7 +8,7 @@ export default (function() {
     let animeSubscription = Rx.Observable.timer(500, 30000)
 	.flatMap(_ => $.ajax(Utils.get("/anime"))).retry().do(data => _posts = data);
 
-    let changes = animeSubscription.publish();
+    let changes = animeSubscription.publishValue();
     let dispatcherEvents = Rx.Observable.fromEventPattern(h => Dispatcher.register(h)).repeat();
     
     let animeNewPost = dispatcherEvents

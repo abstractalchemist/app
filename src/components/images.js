@@ -102,7 +102,7 @@ export default React.createClass({
 		    return Rx.Observable.fromArray(data);
 		    
 		})
-		.subscribe( _ => {});
+		.subscribe( _ => this.setState({recievedData:true}));
 	}
     },
     render() {
@@ -112,6 +112,9 @@ export default React.createClass({
 		{( _ => {
 		    return  (<div className="row" id="image-container">
 			     {( _ => {
+				 if(!this.state.recievedData)
+				     return ( <div className="progress"><div className="indeterminate"></div></div> );
+				 
 				 let cols = this.selectColsFromDevice();
 				 let vecs = [];
 				 for(let i = 0; i < cols; ++i) {

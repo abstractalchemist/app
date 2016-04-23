@@ -50,27 +50,25 @@ export default React.createClass({
     },
     */
     setLocations() {
-	return Auth.checkAllAccess().selectMany(data => {
-	    let frcAccess = false;
-	    let imagesAccess = false;
-	    data.forEach(i => {
-		if(i.accessImages)
-		    imagesAccess = true;
-		if(i.accessFrc)
-		    frcAccess = true
-		
-	    });
-	    let publicLocations = [{ name: "Anime", href: "/anime", desc: "", id: ViewActions.animeId(), view: <Anime /> },
+	let publicLocations = [{ name: "Anime", href: "/anime", desc: "", id: ViewActions.animeId(), view: <Anime /> },
 				   { name: "Convention", href: "/convention", desc: "", id: ViewActions.conventionId(), view: <Convention /> },
 				   { name: "Programming", href: "/programming", desc: "", id: ViewActions.programmingId() },
 				   { name: "Samples", href: "/samples", desc: "", id: ViewActions.samplesId(), view: <Samples />}];
-	    if(frcAccess)
-		publicLocations.push({ name: "FRC", href: "/frc", desc: "", id: ViewActions.frcId(), view: <FRC />});
-	    if(imagesAccess)
-		publicLocations.push({ name: "Images", href: "/images", desc: "", id: ViewActions.imagesId(), noSection: true, view: <Images />});
- 	    return Rx.Observable.fromArray(publicLocations);
-
-	}).toArray();
+	return Rx.Observable.just(publicLocations)
+	    .selectMany( locations => {
+		return Auth.checkImagesAccess().pluck('accessImages').map( accessible => {
+		    if(accessible)
+			locations.push({ name: "Images", href: "/images", desc: "", id: ViewActions.imagesId(), noSection: true, view: <Images />});
+		    return locations;
+		})
+	    })
+	    .selectMany(locations => {
+		return Auth.checkFrcAccess().pluck('accessFrc').map( accessible => {
+		    if(accessible)
+			locations.push({ name: "FRC", href: "/frc", desc: "", id: ViewActions.frcId(), view: <FRC />});
+		    return locations;
+		})
+	    });
     },
 
     findLocation(locationId) {
@@ -86,7 +84,7 @@ export default React.createClass({
 	let viewDispatch = Rx.Observable.fromEventPattern(h => Dispatcher.register(h))
 	    .filter(payload => payload.actionType === 'viewChanged')
 	    .pluck('view');
-	let viewSubject = new Rx.ReplaySubject();
+	let viewSubject = new Rx.ReplaySubject(1);
 	viewDispatch.subscribe(viewSubject);
 	let locationsDispatch = this.setLocations()
 	    .do(locations => {

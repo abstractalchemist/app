@@ -8,13 +8,68 @@ let _auth;
 
 export default (function() {
 
-    let gapiLoadSubject = new Rx.Subject();
-    let signInSubject = new Rx.Subject();
+    let gapiLoadSubject = new Rx.Subject(1);
+
+    // the subject which determinaes who is signed in
+    let signInSubject = new Rx.Subject(1);
+
     let admin = true;
 
-    let animeAuthorizedSubject = new Rx.Subject(),
-	imagesAccessSubject = new Rx.Subject(),
-	frcAccessSubject = new Rx.Subject();
+    
+    let animeAccessObs = Rx.Observable.fromPromise($.ajax(Utils.get("/anime/authorized"))).map( _ =>  true).catch(Rx.Observable.just(false)).do(data => console.log("resolving anime access %s", data));
+    
+    let imagesAccessObs = Rx.Observable.fromPromise($.ajax(Utils.get("/anime/images/authorized"))).map( _ => true).catch(Rx.Observable.just(false)).do(data => console.log("resolving image access %s", data));
+    
+    let frcAccessObs = Rx.Observable.fromPromise($.ajax(Utils.get("/frc/authorized"))).map( _ => true).catch(Rx.Observable.just(false)).do(data => console.log("resolving frc access %s", data));
+
+    let mapAnimeAccess = d => {
+	console.log("Mapping access post %s", d);
+	return { postAnime : d }
+    };
+
+    let mapImageAccess = d => {
+	console.log("Mapping access image %s", d);
+	return { accessImages : d }
+    };
+
+    let mapFrcAccess = d => {
+	console.log("Mapping access frc %s", d);
+	return { accessFrc : d }
+    };
+
+    let animeAuthorizedSubject = new Rx.BehaviorSubject(false),
+	imagesAccessSubject = new Rx.BehaviorSubject(false),
+	frcAccessSubject = new Rx.BehaviorSubject(false);
+
+    
+    let animeStatus = false, imageStatus = false, frcStatus = false;
+    
+    let forwardAnimeStatus = data => {
+	animeAuthorizedSubject.onNext(data);
+	animeStatus = data;
+    };
+    let forwardImageStatus = data => {
+	imagesAccessSubject.onNext(data);
+	imageStatus = data;
+    };
+    let forwardFrcStatus = data => {
+	frcAccessSubject.onNext(data);
+	frcStatus = data;
+    };
+
+    let forwardAllStatus = (a,b,c) => {
+	
+    };
+        
+    let revokeAccess = _ => {
+	console.log("revoking access");
+	forwardAnimeStatus(false);
+	forwardImageStatus(false);
+	forwardFrcStatus(false);
+	
+    };
+
+    revokeAccess();
     
     let onSuccessAnimeAuthorized = _ => {
 	console.log("authorized to add post to anime page");
@@ -32,29 +87,27 @@ export default (function() {
     };
     
     let _authSignin = myAuth => {
-	let isSigningIn = Rx.Observable.fromEventPattern(h => myAuth.isSignedIn.listen(h));
-	isSigningIn.subscribe(signInStatus => console.log("is signing in? %s", signInStatus));
-//	let currentUserSignIn = Rx.Observable.fromEventPattern(h => myAuth.currentUser.listen(h));
+	
+	// the current user
 	let currentUserSignIn = Rx.Observable.merge(Rx.Observable.fromEventPattern(h => myAuth.currentUser.listen(h)), Rx.Observable.just(myAuth.currentUser.get()));
 	currentUserSignIn.subscribe(signInSubject);
 	currentUserSignIn.subscribe(user => {
-	    console.log("current user %s", user);
-	    _currentUser = user;
-	    window.sessionStorage.setItem("jwt", user.getAuthResponse().id_token);
-	    let animeAccessObs = Rx.Observable.fromPromise($.ajax(Utils.get("/anime/authorized")));
-	    animeAccessObs.subscribe(onSuccessAnimeAuthorized, onErrorAuthorized);
-	    animeAccessObs.subscribe(animeAuthorizedSubject);
-	    
-	    let imagesAccessObs = Rx.Observable.fromPromise($.ajax(Utils.get("/anime/images/authorized")));
-	    imagesAccessObs.subscribe(onSuccessImagesAuthorized, onErrorAuthorized);
-	    imagesAccessObs.subscribe(imagesAccessSubject);
-	    
-	    let frcAccessObs = Rx.Observable.fromPromise($.ajax(Utils.get("/frc/authorized")));
-	    frcAccessObs.subscribe(onSuccessFrcAuthorized, onErrorAuthorized);
-	    frcAccessObs.subscribe(frcAccessSubject);
+	    console.log("user sign in? %s", user.isSignedIn());
+	    if(user.isSignedIn()) {
+		
+		_currentUser = user;
+		window.sessionStorage.setItem("jwt", user.getAuthResponse().id_token);
+		animeAccessObs.subscribe(data => forwardAnimeStatus(data));
+		imagesAccessObs.subscribe(data => forwardImageStatus(data));
+		frcAccessObs.subscribe(data => forwardFrcStatus(data));
+		
+	    }
+	    else {
+		window.sessionStorage.setItem("jwt", "");
+		revokeAccess();
+	    }
 	    
 	});
-
 
     };
 
@@ -84,40 +137,29 @@ export default (function() {
 	    return admin;
 	},
 	checkAnimePostAccess(callback) {
-	    return animeAuthorizedSubject.subscribe(callback);
+	    let access = animeAuthorizedSubject.map(mapAnimeAccess);
+	    if(callback)
+		return access.subscribe(callback);
+	    return access;
 	},
 	checkImagesAccess(callback) {
-	    return imagesAccessSubject.subscribe(callback);
+	    let access = imagesAccessSubject.map(mapImageAccess);
+	    if(callback)
+		return access.subscribe(callback);
+	    return access;
 	},
 	checkFrcAccess(callback) {
-	    return frcAccessSubject.subscribe(callback);
-	},
-	checkAllAccess(callback) {
-	    let mapAnimeAccess = d => {
-		return { postAnime : d }
-	    };
-	    let mapImageAccess = d => {
-		return { accessImages : d }
-	    };
-	    let mapFrcAccess = d => {
-		return { accessFrc : d }
-	    };
-	
-	    let accessCheck = Rx.Observable.merge( animeAuthorizedSubject.map(_ => true).catch(Rx.Observable.just(false)).map(mapAnimeAccess),
-						    imagesAccessSubject.map(_ => true).catch(Rx.Observable.just(false)).map(mapImageAccess),
-						    frcAccessSubject.map(_ => true).catch(Rx.Observable.just(false)).map(mapFrcAccess) )
-		.toArray();
+	    let access = frcAccessSubject.map(mapFrcAccess);
 	    if(callback)
-		accessCheck.subscribe(callback, _ => {});
-	    else
-		return accessCheck;
-				  
+		return access.subscribe(callback);
+	    return access;
 	},
 	authSignin(auth) {
 	    _authSignin(auth)
 	},
 	registerSignInCallback(callback) {
-	   return signInSubject.subscribe(callback);
+	    
+	    return signInSubject.subscribe(callback, error => console.log(error));
 	}
     }
 })()

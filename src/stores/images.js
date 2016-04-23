@@ -3,7 +3,16 @@ import Config from '../config'
 import Auth from './auth'
 
 export default (function() {
-    let images = Rx.Observable.fromPromise($.ajax(Utils.get("/anime/images")));
+    
+    let images;
+    try {
+	images = Rx.Observable.fromPromise($.ajax(Utils.get("/anime/images"))).publishValue();
+	images.subscribe( evt => console.log("success"),
+			  error => console.log("images error %s", error));
+    }
+    catch(error) {
+	console.log("Error on image retrieve: %s", error);
+    }
     return {
 	
 	authorized(callback) {
