@@ -9,6 +9,7 @@ var gutil = require('gulp-util');
 var sourcemaps = require('gulp-sourcemaps');
 var assign = require('lodash.assign');
 var babel = require('babelify');
+//var process = require('process');
 
 // add custom browserify options here
 var customOpts = {
@@ -19,22 +20,34 @@ var opts = assign({}, watchify.args, customOpts);
 var b = watchify(browserify(opts)).transform(babel, {presets: ["es2015", "react"]});
 
 // add transformations here
-// i.e. b.transform(coffeeify);
+// i.e. b.transform(coffeeify)
+
+console.log(process.env.PRODUCTION);
 
 gulp.task('js', bundle); // so you can run `gulp js` to build the file
-b.on('update', bundle); // on any dep update, runs the bundler
+if(!process.env.PRODUCTION)
+    b.on('update', bundle); // on any dep update, runs the bundler
 b.on('log', gutil.log); // output build logs to terminal
 
 function bundle() {
-    return b.bundle()
+    if(!process.env.PRODUCTION) {
+	return b.bundle()
+	// log errors if they happen
+            .on('error', gutil.log.bind(gutil, 'Browserify Error'))
+            .pipe(source('bundle.js'))
+    // optional, remove if you don't need to buffer file contents
+            .pipe(buffer())
+	// optional, remove if you dont want sourcemaps
+            .pipe(sourcemaps.init({loadMaps: true})) // loads map from browserify file
+	// Add transformation tasks to the pipeline here.
+            .pipe(sourcemaps.write('./')) // writes .map file
+            .pipe(gulp.dest('./dist'));
+    }
+    return browserify({entries: ['./src/app.js']}).transform(babel, {presets: ["es2015", "react"]})
+	.bundle()
     // log errors if they happen
         .on('error', gutil.log.bind(gutil, 'Browserify Error'))
         .pipe(source('bundle.js'))
-    // optional, remove if you don't need to buffer file contents
-        .pipe(buffer())
-    // optional, remove if you dont want sourcemaps
-        .pipe(sourcemaps.init({loadMaps: true})) // loads map from browserify file
-    // Add transformation tasks to the pipeline here.
-        .pipe(sourcemaps.write('./')) // writes .map file
         .pipe(gulp.dest('./dist'));
+    
 }'use strict';
