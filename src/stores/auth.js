@@ -16,11 +16,6 @@ export default (function() {
     let admin = true;
 
     
-    let animeAccessObs = Rx.Observable.fromPromise($.ajax(Utils.get("/anime/authorized"))).map( _ =>  true).catch(Rx.Observable.just(false)).do(data => console.log("resolving anime access %s", data));
-    
-    let imagesAccessObs = Rx.Observable.fromPromise($.ajax(Utils.get("/anime/images/authorized"))).map( _ => true).catch(Rx.Observable.just(false)).do(data => console.log("resolving image access %s", data));
-    
-    let frcAccessObs = Rx.Observable.fromPromise($.ajax(Utils.get("/frc/authorized"))).map( _ => true).catch(Rx.Observable.just(false)).do(data => console.log("resolving frc access %s", data));
 
     let mapAnimeAccess = d => {
 	console.log("Mapping access post %s", d);
@@ -45,14 +40,17 @@ export default (function() {
     let animeStatus = false, imageStatus = false, frcStatus = false;
     
     let forwardAnimeStatus = data => {
+	console.log("anime allowed: %s", data);
 	animeAuthorizedSubject.onNext(data);
 	animeStatus = data;
     };
     let forwardImageStatus = data => {
+	console.log("image allowed: %s", data);
 	imagesAccessSubject.onNext(data);
 	imageStatus = data;
     };
     let forwardFrcStatus = data => {
+	console.log("frc status: %s", data);
 	frcAccessSubject.onNext(data);
 	frcStatus = data;
     };
@@ -94,6 +92,22 @@ export default (function() {
 	currentUserSignIn.subscribe(user => {
 	    console.log("user sign in? %s", user.isSignedIn());
 	    if(user.isSignedIn()) {
+
+		let animeAccessObs = Rx.Observable.fromPromise($.ajax(Utils.get("/anime/authorized")))
+		    .map( _ =>  true)
+		    .catch(Rx.Observable.just(false))
+			.do(data => console.log("resolving anime access %s", data));
+		
+		let imagesAccessObs = Rx.Observable.fromPromise($.ajax(Utils.get("/anime/images/authorized")))
+		    .map( _ => true)
+		    .catch(Rx.Observable.just(false))
+			.do(data => console.log("resolving image access %s", data));
+		
+		let frcAccessObs = Rx.Observable.fromPromise($.ajax(Utils.get("/frc/authorized")))
+		    .map( _ => true)
+		    .catch(Rx.Observable.just(false))
+			.do(data => console.log("resolving frc access %s", data));
+		
 		
 		_currentUser = user;
 		window.sessionStorage.setItem("jwt", user.getAuthResponse().id_token);

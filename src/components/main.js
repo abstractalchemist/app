@@ -51,21 +51,34 @@ export default React.createClass({
     */
     setLocations() {
 	let publicLocations = [{ name: "Anime", href: "/anime", desc: "", id: ViewActions.animeId(), view: <Anime /> },
-				   { name: "Convention", href: "/convention", desc: "", id: ViewActions.conventionId(), view: <Convention /> },
-				   { name: "Programming", href: "/programming", desc: "", id: ViewActions.programmingId() },
-				   { name: "Samples", href: "/samples", desc: "", id: ViewActions.samplesId(), view: <Samples />}];
+			       { name: "Convention", href: "/convention", desc: "", id: ViewActions.conventionId(), view: <Convention /> },
+			       { name: "Programming", href: "/programming", desc: "", id: ViewActions.programmingId() },
+			       { name: "Samples", href: "/samples", desc: "", id: ViewActions.samplesId(), view: <Samples />}];
+	console.log("setting locations")
 	return Rx.Observable.just(publicLocations)
 	    .selectMany( locations => {
+
 		return Auth.checkImagesAccess().pluck('accessImages').map( accessible => {
-		    if(accessible)
-			locations.push({ name: "Images", href: "/images", desc: "", id: ViewActions.imagesId(), noSection: true, view: <Images />});
+		    locations = locations.filter( ({name:name}) => name !== "Images");
+		    if(accessible) {
+			if(!locations.find( ({name:name}) => name === "Images" ))
+			    locations.push({ name: "Images", href: "/images", desc: "", id: ViewActions.imagesId(), noSection: true, view: <Images />});
+			else
+			    console.log("images already exists");
+		    }
 		    return locations;
 		})
 	    })
 	    .selectMany(locations => {
+
 		return Auth.checkFrcAccess().pluck('accessFrc').map( accessible => {
-		    if(accessible)
-			locations.push({ name: "FRC", href: "/frc", desc: "", id: ViewActions.frcId(), view: <FRC />});
+		    locations = locations.filter( ({name:name}) => name !== "FRC");
+		    if(accessible) {
+			if(!locations.find( ({name:name}) => name === "FRC" ))
+			    locations.push({ name: "FRC", href: "/frc", desc: "", id: ViewActions.frcId(), view: <FRC />});
+			else
+			    console.log("frc alread exists");
+		    }
 		    return locations;
 		})
 	    });
