@@ -9,7 +9,6 @@ var gutil = require('gulp-util');
 var sourcemaps = require('gulp-sourcemaps');
 var assign = require('lodash.assign');
 var babel = require('babelify');
-var replace = require('gulp-replace');
 var fs = require('fs');
 
 // add custom browserify options here
