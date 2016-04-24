@@ -6,7 +6,7 @@ export default (function() {
     
     let images;
     try {
-	images = Rx.Observable.fromPromise($.ajax(Utils.get("/anime/images"))).publishValue();
+	images = Rx.Observable.fromPromise($.ajax(Utils.get("/anime/images"))).catch().publishValue();
 	images.subscribe( evt => console.log("success"),
 			  error => console.log("images error %s", error));
     }

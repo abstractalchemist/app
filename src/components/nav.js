@@ -59,7 +59,7 @@ export default React.createClass({
 	return ( <nav className="white" role="navigation">
 		 <div className="nav-wrapper container">
 		 <a id="logo-container" href="/" className="brand-logo" onClick={this.itemClicked}>Logo</a>
-		 <ul className="right hide-on-med-and-down">
+		 <ul className="right hide-on-med-and-down" style={{ height: "100%"}}>
 		 { this.standardNav() }
 		 <li style={{height:"100%"}}>
 		 <div className="valign-wrapper" style={{height:"100%"}}>
