@@ -38,7 +38,7 @@ function bundle() {
 	    if(process.env.PRODUCTION) {
 		return "/";
 	    }
-	    return "http://localhost:5984";
+	    return "http://localhost:3000";
 	})()), { encoding : "utf8", flag: "w"});
     })
     if(!process.env.PRODUCTION) {
