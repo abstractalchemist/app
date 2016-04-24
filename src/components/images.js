@@ -15,7 +15,7 @@ const ImageCard = React.createClass({
 		<div className="material-placeholder" style={{margin: "10px 10px 10px 10px"}}>
 		<img src={( _ => {
 		    
-		    return this.props.image + "?token=" + Auth.token();
+		    return this.props.image;
 	 	})()
 		} className="materialboxed" data-caption="an image" width="100%"/>
 		</div>
