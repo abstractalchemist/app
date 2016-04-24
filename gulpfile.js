@@ -36,7 +36,7 @@ function bundle() {
 	
 	fs.writeFile('./src/config.js', data.replace('${url}', (function() {
 	    if(process.env.PRODUCTION) {
-		return "/";
+		return "";
 	    }
 	    return "http://localhost:3000";
 	})()), { encoding : "utf8", flag: "w"});
