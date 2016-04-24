@@ -6,9 +6,9 @@ export default (function() {
     
     let images;
     try {
-	images = Rx.Observable.fromPromise($.ajax(Utils.get("/anime/images"))).catch().publishValue();
-	images.subscribe( evt => console.log("success"),
-			  error => console.log("images error %s", error));
+	images = Rx.Observable.fromPromise($.ajax(Utils.get("/anime/images"))).catch();
+//	images.subscribe( evt => console.log("success"),
+//			  error => console.log("images error %s", error));
     }
     catch(error) {
 	console.log("Error on image retrieve: %s", error);
