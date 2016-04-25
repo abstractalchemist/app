@@ -15,6 +15,7 @@ import Search from './search'
 import ViewActions from '../actions/view'
 import Auth from '../stores/auth'
 import Convention from './convention'
+import Device from '../stores/device'
 
 const Front = React.createClass({
 
@@ -26,7 +27,12 @@ const Front = React.createClass({
     },
     render() {
 	return ( <div id="front">
-		 <IndexBanner title="Abstract Alchemist's Lab" description="Something Interesting" img="background1.jpg" signin="true"/>
+		 <IndexBanner title="Abstract Alchemist's Lab" description="Something Interesting" img={( _ => {
+		     if(Device.mobile())
+			 return "background1.png"
+		     return "background1.jpg";
+		 })()
+												       } signin="true"/>
 		 <Sections sections={this.props.locations}/>
 		 <Parallax title="Other Stuff You Might Be Interested In" img="background3.jpg" />
 		 <Footer settings={ this.settings() } connect={ this.connections()} bio="I am a programmer"/>
