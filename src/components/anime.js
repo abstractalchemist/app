@@ -258,14 +258,20 @@ const AnimeView = React.createClass({
 	return 4;
     },
     componentWillMount() {
-
+	this.isMounted = true;
 	this.subToken = AnimeStore.registerCallback(_ => {
 	    //this.setState({ current : AnimeStore.posts()})
 	    this.generateItems(AnimeStore.posts(), this.selectColsBasedOnDevice())
+	    AnimeStore.schedule().subscribe(data => {
+		if(this.isMounted)
+		    this.setState({ schedule: data });
+	    });
 	});
-	AnimeStore.schedule().subscribe(data => this.setState({ schedule: data }));
+
+
     },
     componentWillUnmount() {
+	this.isMounted = false;
 	this.subToken.dispose();
     },
     fullArticle(id) {
@@ -299,10 +305,14 @@ const AnimeView = React.createClass({
 	    Rx.Observable.range(0, colCount)
 		.selectMany(col => current.filter( (_, index) => index % 4 == col).toArray())
 		.select( (data, index) => {
-//		    console.log("setting state to " + data + " and index " + index)
-		    this.setState({ ['col' + index ] : data });
+		    //		    console.log("setting state to " + data + " and index " + index)
+		    if(this.isMounted)
+			this.setState({ ['col' + index ] : data });
 		})
-		.subscribe(_ => this.setState({recievedData:true}));
+		.subscribe(_ => {
+		    if(this.isMounted)
+			this.setState({recievedData:true});
+		})
 			 
 	}
 	

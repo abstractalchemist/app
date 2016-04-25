@@ -34,7 +34,7 @@ export default React.createClass({
 	    
     },
     componentDidUpdate() {
-	$('.button-collapse').sideNav();
+
     },
     standardNav() {
 	if(this.props.locations) {
@@ -57,8 +57,9 @@ export default React.createClass({
     },
     render() {
 	return ( <nav className="white" role="navigation">
-		 <div className="nav-wrapper container">
+		 <div className="nav-wrapper">
 		 <a id="logo-container" href="/" className="brand-logo" onClick={this.itemClicked}>Logo</a>
+		 <a href="#" data-activates="nav-mobile" className="button-collapse"><i className="material-icons">menu</i></a>
 		 <ul className="right hide-on-med-and-down" style={{ height: "100%"}}>
 		 { this.standardNav() }
 		 <li style={{height:"100%"}}>
@@ -89,18 +90,27 @@ export default React.createClass({
 		 <a href="/search" ><i className="material-icons">search</i></a>
 		 </li>
 		 </ul>
-		 <ul className="side-nav">
-		 { this.standardNav() }
+		 <ul className="side-nav" id="nav-mobile">
 		 <li>
-		 {( _ => {
-		     if(this.state.user) {
-			 return (<a>Welcome back, {this.state.user.getBasicProfile().getEmail()}</a>);
+ 		 {( _ => {
+ 		     if(this.state.user) {
+ 			 return (<a>{this.state.user.getBasicProfile().getEmail()}</a>);
 		     }
 		 })()
 		 }
 		 </li>
+		 
+		 { this.standardNav() }
+		 
+		 <li>
+		 <GoogleSignin />
+		 </li>
+		 <li>
+		 <GoogleSignOut />
+		 </li>
+
 		 </ul>
-		 <a href="#" data-activates="nav-mobile" className="button-collapse"><i className="material-icons">menu</i></a>
+
 		 </div>
 		 </nav>
 	       );

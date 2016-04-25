@@ -62,9 +62,12 @@ export default React.createClass({
 	return 4;
     },
     componentDidMount() {
+	this.isMounted = true;
 	ImageStore.images().subscribe(data => {
-	    this.setState({ images: data })
-	    this.generateImageCols(this.selectColsFromDevice());
+	    if(this.isMounted) {
+		this.setState({ images: data })
+		this.generateImageCols(this.selectColsFromDevice());
+	    }
 	});
 	let subscriber = d => {
 //	    console.log("scroll distance %s", d);
@@ -80,7 +83,7 @@ export default React.createClass({
 	    })
 	    .do(distance => {
 		if(distance >= -100 ) {
-		    if(this.state.end < this.state.images.length)
+		    if(this.isMounted && this.state.end < this.state.images.length)
 			this.setState({end : this.state.end + 10})
 		}
 		
@@ -88,6 +91,9 @@ export default React.createClass({
 		.subscribe(subscriber, errorHandler);
 
 
+    },
+    componentWillUnmount() {
+	this.isMounted = false;
     },
     generateImageCols(colCount) {
 	if(this.state.images) {
@@ -98,11 +104,16 @@ export default React.createClass({
 	    Rx.Observable.range(0, colCount)
 		.selectMany(col => imageObservable.filter( (_, index) => index % 4 == col).toArray())
 		.selectMany( (data, index) => {
-		    this.setState({['img' + index] : data});
+		    if(this.isMounted)
+			this.setState({['img' + index] : data});
+		    
 		    return Rx.Observable.fromArray(data);
 		    
 		})
-		.subscribe( _ => this.setState({recievedData:true}));
+		.subscribe( _ => {
+		    if(this.isMounted)
+			this.setState({recievedData:true})
+		})
 	}
     },
     render() {

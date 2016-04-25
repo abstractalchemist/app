@@ -97,7 +97,7 @@ export default React.createClass({
 	let viewDispatch = Rx.Observable.fromEventPattern(h => Dispatcher.register(h))
 	    .filter(payload => payload.actionType === 'viewChanged')
 	    .pluck('view');
-	let viewSubject = new Rx.ReplaySubject(1);
+	let viewSubject = new Rx.BehaviorSubject("front");
 	viewDispatch.subscribe(viewSubject);
 	let locationsDispatch = this.setLocations()
 	    .do(locations => {

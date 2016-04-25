@@ -29,18 +29,25 @@ if(!process.env.PRODUCTION)
     b.on('update', bundle); // on any dep update, runs the bundler
 b.on('log', gutil.log); // output build logs to terminal
 
+fs.readFile('./src/config.js.tmpl', 'utf8', function(err, data) {
+    data = data.replace('${url}', (function() {
+	if(process.env.PRODUCTION) {
+		return "";
+	}
+	return "http://localhost:3000";
+    })());
+    data = data.replace('${image.url}', (function() {
+	if(process.env.PRODUCTION) {
+	    return "/doc/images";
+	}
+	return "/anime/images";
+	})());
+    fs.writeFile('./src/config.js', data, { encoding : "utf8", flag: "w"});
+})    
 
 
 function bundle() {
-    fs.readFile('./src/config.js.tmpl', 'utf8', function(err, data) {
-	
-	fs.writeFile('./src/config.js', data.replace('${url}', (function() {
-	    if(process.env.PRODUCTION) {
-		return "";
-	    }
-	    return "http://localhost:3000";
-	})()), { encoding : "utf8", flag: "w"});
-    })
+
     if(!process.env.PRODUCTION) {
 	
 	return b.bundle()

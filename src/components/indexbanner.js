@@ -20,7 +20,7 @@ export default React.createClass({
 		<div className="section no-pad-bot">
 		<div className="container center">
 		<br></br>
-		<h1 className="header center teal-text text-lighten-2">{ this.props.title }</h1>
+		<h1 className="header center white-text text-lighten-2">{ this.props.title }</h1>
 		<div className="row center">
 		<h5 className="header col s12 light">{ this.props.description }</h5>
 		</div>
