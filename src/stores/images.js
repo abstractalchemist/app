@@ -6,7 +6,7 @@ export default (function() {
     
     let images;
     try {
-	images = Rx.Observable.fromPromise($.ajax(Utils.get(Config.imageUrl()))).catch();
+	images = Rx.Observable.fromPromise($.ajax(Utils.get("/anime/images"))).catch();
 //	images.subscribe( evt => console.log("success"),
 //			  error => console.log("images error %s", error));
     }
@@ -30,7 +30,7 @@ export default (function() {
 	    }
 	    if(id.startsWith('http://'))
 		return id;
-	    return Config.dataUrl() + "/anime/images/" + id
+	    return Config.imageUrl() + "/" + id
 	}
     }
 })()

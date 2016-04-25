@@ -40,7 +40,7 @@ fs.readFile('./src/config.js.tmpl', 'utf8', function(err, data) {
 	if(process.env.PRODUCTION) {
 	    return "/doc/images";
 	}
-	return "/anime/images";
+	return "http://localhost:3000/anime/images";
 	})());
     fs.writeFile('./src/config.js', data, { encoding : "utf8", flag: "w"});
 })    
