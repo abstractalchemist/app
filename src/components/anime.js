@@ -303,7 +303,7 @@ const AnimeView = React.createClass({
 			 fullArticle={this.fullArticle}/> )
 	    }));
 	    Rx.Observable.range(0, colCount)
-		.selectMany(col => current.filter( (_, index) => index % 4 == col).toArray())
+		.selectMany(col => current.filter( (_, index) => index % colCount == col).toArray())
 		.select( (data, index) => {
 		    //		    console.log("setting state to " + data + " and index " + index)
 		    if(this.isMounted)
