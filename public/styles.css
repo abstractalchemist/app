@@ -58,7 +58,7 @@ span.label {
     font-weight: normal;
 }
 span.icon {
-    background: url('/public/google_signin.png') transparent 5px 50% no-repeat;
+    background: url('public/google_signin.png') transparent 5px 50% no-repeat;
     display: inline-block;
     vertical-align: middle;
     width: 42px;
@@ -67,8 +67,8 @@ span.icon {
 span.buttonText {
     display: inline-block;
     vertical-align: middle;
-    padding-left: 42px;
-    padding-right: 42px;
+    /*padding-left: 42px;*/
+    /*padding-right: 42px;*/
     font-size: 14px;
     font-weight: bold;
     /* Use the Roboto font that is loaded in the <head> */

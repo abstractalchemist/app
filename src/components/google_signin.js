@@ -35,7 +35,7 @@ export default React.createClass({
     },
     standardButton() {
 	return (<div id="signin">
-		<div id="customBtn" className="customGPlusSignIn">
+		<div id="customBtn" className="customGPlusSignIn" style={{height:"48px", width:"120px"}}>
 		<span className="icon"></span>
 		<span className="buttonText">Google</span>
 		</div>
