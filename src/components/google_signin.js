@@ -22,23 +22,23 @@ export default React.createClass({
 	};
 	Auth.registerGapiLoad(gapi => {
 	    this.setState({ gapi: gapi });
-
+	    try {
+		gapi.auth2.getAuthInstance().signIn();
+		this.signin();
+	    }
+	    catch(error) {
+		console.log("Error on auto signin: %s", error);
+	    }
+	    gapi.auth2.getAuthInstance().attachClickHandler(document.querySelector("#customBtn"), {}, this.signin, this.failure);
 	});
 
     },
     standardButton() {
 	return (<div id="signin">
-		{( _ => {
-		    if(this.state.gapi) {
-			try {
-			    this.state.gapi.signin2.render('signin', { onSuccess: this.signin, onFailure: this.failure });
-			}
-			catch(err) {
-			}
-		    }
-		    return (<div></div>)
-		})()
-		}
+		<div id="customBtn" className="customGPlusSignIn">
+		<span className="icon"></span>
+		<span className="buttonText">Google</span>
+		</div>
 		</div>);
     },
     render() {

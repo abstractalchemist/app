@@ -130,7 +130,14 @@ export default (function() {
 	    console.log("event gapi: %s", evt);
 	})
 	.selectMany(evt => Rx.Observable.just(evt.detail))
-	.subscribe(gapiLoadSubject);
+	.subscribe(gapi => {
+	    let gapiLoad = Rx.Observable.fromCallback(gapi.load);
+	    gapiLoad('auth2').map( _ => {
+		gapi.auth2.init();
+		return gapi;
+	    }).subscribe(gapiLoadSubject);
+	});
+
     
     return {
 	init() {

@@ -63,12 +63,7 @@ export default React.createClass({
 		 <ul className="right hide-on-med-and-down" style={{ height: "100%"}}>
 		 { this.standardNav() }
 		 <li style={{height:"100%"}}>
-		 <div className="valign-wrapper" style={{height:"100%"}}>
-		 <div className="valign">
 		 <GoogleSignin />
-		 </div>
-		 </div>
-		 
 		 </li>
 		 <li>
  		 <div className="valign-wrapper" style={{height:"100%"}}>
