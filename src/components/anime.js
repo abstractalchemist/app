@@ -114,7 +114,7 @@ const AnimeItem = React.createClass({
 
 		 <div key={this.props.titleId + '-actions'} className="fixed-action-btn horizontal click-to-toggle" style={{position: "relative", top: "5px"}}>
 		 <a className="btn-floating btn-large red">
-		 <i className="large mdi-navigation-menu"></i>
+		 <i className="material-icons">menu</i>
 		 </a>
 		 <ul style={{ right: "0"  }}>
 		 {(() => {
