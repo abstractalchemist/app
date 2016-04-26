@@ -1,5 +1,6 @@
 import React from 'react/dist/react'
 import Auth from '../stores/auth'
+import Device from '../stores/device'
 
 export default React.createClass({
     getInitialState() {
@@ -33,11 +34,31 @@ export default React.createClass({
 	});
 
     },
+    style() {
+	if(Device.mobile()) {
+	    return { paddingBottom: "10px" }
+	}
+	return { height: "100%", paddingRight: "10px" };
+	
+    },
     standardButton() {
-	return (<div id="signin">
-		<div id="customBtn" className="customGPlusSignIn" style={{height:"48px", width:"120px"}}>
+	return (<div>
+		{ ( _ => {
+		    if(Device.mobile()) {
+			return ( <span style={{color:"black"}}>Sign In With:</span> );
+		    }
+		})()
+		}
+		<div id="signin" className="valign-wrapper" style={this.style()}>
+		<div id="customBtn" className="valign btn">
 		<span className="icon"></span>
-		<span className="buttonText">Google</span>
+		<span className="buttonText">{( _ => {
+		    if(Device.mobile())
+			return "Google"
+		    return "Sign In With Google"
+		})()
+					     }</span>
+		</div>
 		</div>
 		</div>);
     },
