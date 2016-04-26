@@ -33,3 +33,9 @@
 	opacity: 1
     }
 }
+
+@media screen and (max-width: 760px) {
+    img.article {
+	width:100%
+    }
+}

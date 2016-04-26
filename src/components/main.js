@@ -34,7 +34,10 @@ const Front = React.createClass({
 		 })()
 												       } signin="true"/>
 		 <Sections sections={this.props.locations}/>
-		 <Parallax title="Other Stuff You Might Be Interested In" img="background3.jpg" />
+ 		 <Parallax title="Other Stuff You Might Be Interested In" img={( _ => {
+		     return "background3.jpg"
+		 })()
+									      }/>
 		 <Footer settings={ this.settings() } connect={ this.connections()} bio="I am a programmer"/>
 		 </div>
 	       );

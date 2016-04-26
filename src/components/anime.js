@@ -319,7 +319,12 @@ const AnimeView = React.createClass({
     },
     render() {
 	return ( <div>
-		 <IndexBanner title="Anime And Manga" img="background4.jpg" />
+		 <IndexBanner title="Anime And Manga" img={(_ => {
+		     if(Device.mobile())
+			 return "background_mobile.png"
+		     return "background4.jpg"
+		 })()
+							  }/>
 		 <div className="container">
 		 {( () => {
 		     return (<div className="row">
@@ -393,7 +398,7 @@ const AnimeArticle = React.createClass({
 		 <h1 className="center-align">{this.state.title}</h1>
 		 
 		 <div className="col s8 offset-s2">
-		 <img src={ImageStore.imageUrl(this.state.img)} style={{minWidth: "60%"}}/>
+		 <img src={ImageStore.imageUrl(this.state.img)} style={{minWidth: "60%"}} className="article"/>
 		 </div>
 		 <div className="col s12">
 		 <p>
