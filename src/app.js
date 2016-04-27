@@ -29,7 +29,7 @@ $(document).ready(() => {
     page('/samples', _ => {
 	ViewActions.samples();
     });
-    page('/', _ => {
+    page('*', _ => {
 	console.log("default login");
 	ViewActions.front();
     });
