@@ -15,12 +15,21 @@ export default React.createClass({
     componentDidUpdate() {
 	$('.parallax').parallax();
     },
+    classes() {
+	if(this.props.classes) {
+	    return this.props.classes;
+	}
+	return "header center white-text text-lighten-2"
+    },
+    styles() {
+	return this.props.styles;
+    },
     render() {
 	return (<div className="parallax-container">
 		<div className="section no-pad-bot">
 		<div className="container center">
 		<br></br>
-		<h1 className="header center white-text text-lighten-2">{ this.props.title }</h1>
+		<h1 className={this.classes()} style={this.styles()}>{ this.props.title }</h1>
 		<div className="row center">
 		<h5 className="header col s12 light">{ this.props.description }</h5>
 		</div>

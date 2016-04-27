@@ -8,31 +8,48 @@ export default React.createClass({
     },
 
     signin() {
-	Auth.authSignin(gapi.auth2.getAuthInstance());
+	if(this.isMounted)
+	    Auth.authSignin(gapi.auth2.getAuthInstance());
     },
     failure() {
 	console.log("error on signin: %s", err.error);
     },
     componentDidMount() {
-
-	let signin = user => {
-	    Auth.authSignin(gapi.auth2.getAuthInstance());
-	};
-	let failure = error => {
-	    console.log("error on signin: %s", err.error);
-	};
-	Auth.registerGapiLoad(gapi => {
+	this.authDispose = Auth.registerGapiLoad(gapi => {
 	    this.setState({ gapi: gapi });
-	    try {
-		gapi.auth2.getAuthInstance().signIn();
+	    let authSignIn = data => {
 		this.signin();
+	    };
+	    let authError = error => {
+	    };
+	    
+	    
+	    try {
+		// if there is a user;
+		// if not signed in
+		if(gapi.auth2.getAuthInstance().isSignedIn.get()) {
+		    
+		    console.log("is signed in; signing in");
+		    Rx.Observable.fromPromise(gapi.auth2.getAuthInstance().signIn()).subscribe(authSignIn, authError);
+		}
+		else {
+		    console.log("not signedIn");
+		}
+
 	    }
 	    catch(error) {
 		console.log("Error on auto signin: %s", error);
 	    }
 	    gapi.auth2.getAuthInstance().attachClickHandler(document.querySelector("#customBtn"), {}, this.signin, this.failure);
+	    this.isMounted = true;
 	});
 
+    },
+    componentWillUnmount() {
+	if(this.authDispose) {
+	    this.authDispose.dispose();
+	}
+	this.isMounted = false;
     },
     style() {
 	if(Device.mobile()) {

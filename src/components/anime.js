@@ -324,7 +324,7 @@ const AnimeView = React.createClass({
 			 return "background_mobile.png"
 		     return "background4.jpg"
 		 })()
-							  }/>
+							  } styles={{textShadow: "1px 1px 1px #000000"}}/>
 		 <div className="container">
 		 {( () => {
 		     return (<div className="row">

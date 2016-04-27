@@ -32,7 +32,7 @@ const Front = React.createClass({
 			 return "background1.png"
 		     return "background1.jpg";
 		 })()
-												       } signin="true"/>
+												       } signin="true" classes="header center teal-text text-lighten-5" styles={{fontWeight: "500", textShadow: "1px 1px 8px #3BA52F"}}/>
 		 <Sections sections={this.props.locations}/>
  		 <Parallax title="Other Stuff You Might Be Interested In" img={( _ => {
 		     return "background3.jpg"

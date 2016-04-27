@@ -8,10 +8,10 @@ let _auth;
 
 export default (function() {
 
-    let gapiLoadSubject = new Rx.Subject(1);
+    let gapiLoadSubject = new Rx.Subject();
 
     // the subject which determinaes who is signed in
-    let signInSubject = new Rx.Subject(1);
+    let signInSubject = new Rx.Subject();
 
     let admin = true;
 
@@ -126,14 +126,21 @@ export default (function() {
     };
 
     Rx.Observable.fromEvent(window, 'gapiLoaded')
-	.do(evt => {
-	    console.log("event gapi: %s", evt);
-	})
-	.selectMany(evt => Rx.Observable.just(evt.detail))
+    	.pluck('detail')
 	.subscribe(gapi => {
 	    let gapiLoad = Rx.Observable.fromCallback(gapi.load);
 	    gapiLoad('auth2').map( _ => {
 		gapi.auth2.init();
+		gapi.auth2.getAuthInstance().isSignedIn.listen(d => {
+		    console.log("is signing in: %s", d);
+		    if(d) {
+			Rx.Observable.fromPromise(gapi.auth2.getAuthInstance().signIn()).subscribe( _ => {
+			    console.log("auth store signing in");
+			    
+			    _authSignin(gapi.auth2.getAuthInstance());
+			});
+		    }
+		});
 		return gapi;
 	    }).subscribe(gapiLoadSubject);
 	});
