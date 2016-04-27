@@ -16,6 +16,7 @@ import ViewActions from '../actions/view'
 import Auth from '../stores/auth'
 import Convention from './convention'
 import Device from '../stores/device'
+import Programming from './programming'
 
 const Front = React.createClass({
 
@@ -61,7 +62,7 @@ export default React.createClass({
     setLocations() {
 	let publicLocations = [{ name: "Anime", href: "/anime", desc: "", id: ViewActions.animeId(), view: <Anime /> },
 			       { name: "Convention", href: "/convention", desc: "", id: ViewActions.conventionId(), view: <Convention /> },
-			       { name: "Programming", href: "/programming", desc: "", id: ViewActions.programmingId() },
+			       { name: "Programming", href: "/programming", desc: "", id: ViewActions.programmingId(), view: <Programming /> },
 			       { name: "Samples", href: "/samples", desc: "", id: ViewActions.samplesId(), view: <Samples />}];
 	console.log("setting locations")
 	return Rx.Observable.just(publicLocations)
