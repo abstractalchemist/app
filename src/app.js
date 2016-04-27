@@ -27,6 +27,7 @@ $(document).ready(() => {
 	ViewActions.convention();
     });
     page('/samples', _ => {
+	ViewActions.samples();
     });
     page('/', _ => {
 	console.log("default login");

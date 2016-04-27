@@ -20,7 +20,8 @@
     "dispatchr": "~0.3.3",
     "flux": "~2.1.1",
     "ampersand-events": "~1.1.1",
-    "page": "~1.7.1"
+    "page": "~1.7.1",
+    "three": "~0.76.1"
   },
   "devDependencies": {
     "gulp": "~3.9.1",
