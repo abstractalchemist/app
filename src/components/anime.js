@@ -1,4 +1,4 @@
-import React from 'react/dist/react'
+import React from 'react/dist/react-with-addons'
 import IndexBanner from './indexbanner'
 import Carousel from './carousel'
 import AnimeStore from '../stores/anime'
@@ -41,6 +41,7 @@ const Pagination = React.createClass({
 });
 
 const Tags = React.createClass({
+    mixins: [React.PureRenderMixin],
     render() {
 	return (<div className="section">
 		{( _=> {
@@ -158,19 +159,18 @@ const AnimeItem = React.createClass({
     }
 });
 
-const Col = React.createClass({
-    render() {
-	return (<div className={"col s" + this.props.width}>
-		<div className="row">
-		{( _=> {
-		    return this.props.data;
-		})()
-		}
-		</div>
-		</div>
-	       );
-    }
-});
+const Col = function(props) {
+    return (<div className={"col s" + props.width}>
+	    <div className="row">
+	    {( _=> {
+		return props.data;
+	    })()
+	    }
+	    </div>
+	    </div>
+	   );
+
+}
 
 const NewAnimePost = React.createClass({
     getInitialState() {
@@ -213,6 +213,7 @@ const NewAnimePost = React.createClass({
  *        img - the current img
  */
 const AnimeSchedule = React.createClass({
+    mixins: [React.PureRenderMixin],
     render() {
 	return (<div className="col s12" style={{animation: "6s slidein"}}>
 		<div className="card">
@@ -257,7 +258,8 @@ const AnimeView = React.createClass({
 	    return 1;
 	return 4;
     },
-    componentWillMount() {
+    componentDidMount() {
+	$('.collapsible').collapsible();
 	this.isMounted = true;
 	this.subToken = AnimeStore.registerCallback(_ => {
 	    //this.setState({ current : AnimeStore.posts()})
@@ -267,7 +269,11 @@ const AnimeView = React.createClass({
 		    this.setState({ schedule: data });
 	    });
 	});
-
+	AnimeStore.tags().subscribe(data => {
+	    if(this.isMounted)
+		this.setState( { tags: data } );
+	});
+			 
 
     },
     componentWillUnmount() {
@@ -312,10 +318,20 @@ const AnimeView = React.createClass({
 		.subscribe(_ => {
 		    if(this.isMounted)
 			this.setState({recievedData:true});
-		})
-			 
+		});
+	    
 	}
 	
+    },
+    filterByTag(evt) {
+	let tag = $(evt.target).text();
+	console.log("filtering by tag " + tag);
+	if(this.subToken) {
+	    this.subToken.dispose();
+	}
+	AnimeStore.tagged(tag).subscribe(items => this.generateItems(items, this.selectColsBasedOnDevice()))
+	
+	evt.preventDefault();
     },
     render() {
 	return ( <div>
@@ -325,6 +341,24 @@ const AnimeView = React.createClass({
 		     return "background4.jpg"
 		 })()
 							  } styles={{textShadow: "1px 1px 1px #000000"}}/>
+		 <ul className="collapsible" data-collapsible="accordion">
+		 <li>
+		 <div className="collapsible-header">Filter</div>
+		 <div className="collapsible-body">
+		 <div className="collection">
+		 {( _ => {
+		     if(this.state.tags) {
+			 return this.state.tags.map(d => {
+			     return ( <a onClick={this.filterByTag} href="#" className="collection-item">{d}</a> )
+			 })
+		     }
+		 })()
+		 }
+		 </div>
+		 </div>
+		 </li>
+		 </ul>
+		 
 		 <div className="container">
 		 {( () => {
 		     return (<div className="row">

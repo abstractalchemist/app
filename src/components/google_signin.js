@@ -8,6 +8,7 @@ export default React.createClass({
     },
 
     signin() {
+	console.log("Auth Click");
 	if(this.isMounted)
 	    Auth.authSignin(gapi.auth2.getAuthInstance());
     },
@@ -40,7 +41,7 @@ export default React.createClass({
 	    catch(error) {
 		console.log("Error on auto signin: %s", error);
 	    }
-	    gapi.auth2.getAuthInstance().attachClickHandler(document.querySelector("#customBtn"), {}, this.signin, this.failure);
+	    gapi.auth2.getAuthInstance().attachClickHandler(document.querySelector("#" + this.signinId()), {}, this.signin, this.failure);
 	    this.isMounted = true;
 	});
 
@@ -58,6 +59,12 @@ export default React.createClass({
 	return { height: "100%", paddingRight: "10px" };
 	
     },
+    signinId() {
+	if(this.props.signinId) {
+	    return this.props.signinId;
+	}
+	return "customBtn";
+    },
     standardButton() {
 	return (<div>
 		{ ( _ => {
@@ -67,7 +74,7 @@ export default React.createClass({
 		})()
 		}
 		<div id="signin" className="valign-wrapper" style={this.style()}>
-		<div id="customBtn" className="valign btn">
+		<div id={this.signinId()} className="valign btn google-signin-wrapper">
 		<span className="icon"></span>
 		<span className="buttonText">{( _ => {
 		    if(Device.mobile())

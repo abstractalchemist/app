@@ -98,7 +98,7 @@ export default React.createClass({
 		 { this.standardNav() }
 		 
 		 <li>
-		 <GoogleSignin />
+		 <GoogleSignin signinId="google-mobile"/>
 		 </li>
 		 <li>
 		 <GoogleSignOut />

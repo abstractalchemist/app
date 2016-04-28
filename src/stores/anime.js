@@ -31,6 +31,12 @@ export default (function() {
     changes.connect();
     
     let store = {
+	tags() {
+	    return Rx.Observable.fromPromise($.ajax(Utils.get("/anime/tags")));
+	},
+	tagged(tag) {
+	    return Rx.Observable.fromPromise($.ajax(Utils.get("/anime?tag=" + tag)));
+	},
 	post(id) {
 	    return Rx.Observable.fromPromise($.ajax(Utils.get("/anime/" + id)));
 	},

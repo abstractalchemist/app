@@ -40,7 +40,7 @@
     }
 }
 
-#customBtn {
+.google-signin-wrapper {
     display: inline-block;
     background: white;
     color: #444;
@@ -50,21 +50,21 @@
     box-shadow: 1px 1px 1px grey;
     white-space: nowrap;
 }
-#customBtn:hover {
+.google-signin-wrapper:hover {
     cursor: pointer;
 }
-span.label {
+.google-signin-wrapper > span.label {
     font-family: serif;
     font-weight: normal;
 }
-span.icon {
+.google-signin-wrapper > span.icon {
     background: url('google_signin.png') transparent no-repeat;
     display: inline-block;
     vertical-align: middle;
     width: 32px;
     height: 32px;
 }
-span.buttonText {
+.google-signin-wrapper > span.buttonText {
     display: inline-block;
     vertical-align: middle;
     /*padding-left: 42px;
